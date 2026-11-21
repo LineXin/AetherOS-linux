@@ -8,7 +8,6 @@ for path in /usr/lib/os-release /etc/issue /etc/issue.net /etc/lsb-release; do
 done
 install -D -m 0644 /etc/aetheros/os-release /usr/lib/os-release
 ln -sfn ../usr/lib/os-release /etc/os-release
-install -D -m 0644 /etc/aetheros/os-release /etc/aetheros/os-release
 printf '%s\n' 'aetheros' > /etc/hostname
 cat > /etc/hosts <<'EOF'
 127.0.0.1 localhost
@@ -25,3 +24,6 @@ if [ -f /etc/default/grub ]; then
     fi
 fi
 install -D -m 0644 /usr/share/aetheros/branding/aetheros-wallpaper.svg /usr/share/backgrounds/aetheros-wallpaper.svg
+chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-wallpaper.svg /usr/share/backgrounds/aetheros-wallpaper.svg
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-wallpaper.svg /usr/share/pixmaps/aetheros-wallpaper.svg
