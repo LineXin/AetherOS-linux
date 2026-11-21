@@ -13,3 +13,7 @@ xfce4-goodies
 thunar
 xfce4-terminal
 xfce4-settings
+lightdm
+kde-standard
+plasma-workspace
+sddm
