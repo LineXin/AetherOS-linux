@@ -1,0 +1,2 @@
+# AetherHub invokes only the restricted allow-list helper.
+%sudo ALL=(root) NOPASSWD: /usr/local/sbin/aetheros-tune *
