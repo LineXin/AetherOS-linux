@@ -1,9 +1,16 @@
 #!/bin/sh
 set -eu
-WALLPAPER=/usr/share/aetheros/branding/aetheros-wallpaper-mountain.svg
+WALLPAPER="${1:-/usr/share/aetheros/branding/aetheros-wallpaper-mountain.svg}"
+case "$WALLPAPER" in
+  /usr/share/aetheros/branding/aetheros-wallpaper-mountain.svg|/usr/share/aetheros/branding/aetheros-wallpaper-abstract.svg) ;;
+  *) echo "Wallpaper path is not an approved AetherOS asset" >&2; exit 2;;
+esac
 if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
-    plasma-apply-wallpaperimage "$WALLPAPER" || true
+    plasma-apply-wallpaperimage "$WALLPAPER"
 elif command -v xfconf-query >/dev/null 2>&1; then
-    xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s "$WALLPAPER" 2>/dev/null || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "$WALLPAPER" 2>/dev/null || true
+    xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s "$WALLPAPER" 2>/dev/null || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "$WALLPAPER"
     xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-style -n -t int -s 5 2>/dev/null || true
+else
+    echo "No supported desktop wallpaper tool found" >&2
+    exit 1
 fi
