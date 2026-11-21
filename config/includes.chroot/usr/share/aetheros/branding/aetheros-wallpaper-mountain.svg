@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#080b14"/><stop offset=".62" stop-color="#24202a"/><stop offset="1" stop-color="#f05b2d"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#ffb06b" stop-opacity=".95"/><stop offset="1" stop-color="#ff5a2b" stop-opacity="0"/></radialGradient>
+ <linearGradient id="mount" x2="0" y2="1"><stop stop-color="#303744"/><stop offset="1" stop-color="#0a0d14"/></linearGradient>
+</defs>
+<rect width="2560" height="1440" fill="url(#sky)"/><circle cx="1760" cy="850" r="620" fill="url(#sun)"/>
+<path d="M0 910 270 690 470 810 780 520 1040 820 1300 600 1550 850 1840 570 2150 830 2390 650 2560 800V1440H0Z" fill="url(#mount)"/>
+<path d="M0 1010 330 860 610 980 930 730 1210 1000 1530 790 1800 1000 2110 780 2380 940 2560 870V1440H0Z" fill="#111722"/>
+<path d="M0 1180Q620 1050 1280 1190T2560 1130V1440H0Z" fill="#080c13"/>
+<path d="M0 1220Q700 1120 1280 1230T2560 1170" fill="none" stroke="#ff7045" stroke-opacity=".5" stroke-width="5"/>
+<g transform="translate(1760 610)" fill="none" stroke="#ff713f" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"><circle r="190" opacity=".8"/><path d="M-112 118 0-128 112 118M-66 25H66" stroke-width="22"/></g>
+<g font-family="DejaVu Sans, sans-serif"><text x="170" y="1120" fill="#f4f2f1" font-size="94" letter-spacing="22">AETHEROS</text><text x="176" y="1195" fill="#ff9a77" font-size="32" letter-spacing="12">PURE. FAST. REFINED.</text></g>
+</svg>
