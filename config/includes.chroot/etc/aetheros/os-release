@@ -1,0 +1,11 @@
+NAME="AetherOS"
+PRETTY_NAME="AetherOS GNU/Linux"
+ID=aetheros
+ID_LIKE=debian
+VERSION="1.0"
+VERSION_ID="1.0"
+VERSION_CODENAME="aether"
+HOME_URL="https://github.com/LineXin/AetherOS-linux"
+SUPPORT_URL="https://github.com/LineXin/AetherOS-linux/issues"
+BUG_REPORT_URL="https://github.com/LineXin/AetherOS-linux/issues"
+LOGO=aetheros
