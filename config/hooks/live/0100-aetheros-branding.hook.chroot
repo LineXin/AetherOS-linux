@@ -3,7 +3,7 @@ set -eu
 # Keep AetherOS identity files as locally diverted files across package upgrades.
 for path in /usr/lib/os-release /etc/issue /etc/issue.net /etc/lsb-release; do
     if [ -e "$path" ] || [ -L "$path" ]; then
-        dpkg-divert --local --quiet --add --rename "$path" || true
+        dpkg-divert --local --quiet --add "$path" || true
     fi
 done
 install -D -m 0644 /etc/aetheros/os-release /usr/lib/os-release
