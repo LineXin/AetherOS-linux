@@ -1,3 +1,10 @@
 # AetherOS Branding
 
-Place wallpapers, icons, logos, and theme assets here. Keep assets appropriately licensed and document their source.
+Branding assets will live here.
+
+Planned assets:
+- Logo and icon
+- Wallpapers
+- GTK theme
+- Installer artwork
+- Login screen branding
