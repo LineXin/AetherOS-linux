@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=AetherOS Wallpaper
+Comment=Apply the default AetherOS wallpaper
+Exec=/usr/local/bin/aetheros-wallpaper
+OnlyShowIn=XFCE;
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
