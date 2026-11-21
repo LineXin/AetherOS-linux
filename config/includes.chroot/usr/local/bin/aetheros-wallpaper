@@ -1,7 +1,9 @@
 #!/bin/sh
 set -eu
-WALLPAPER=/usr/share/aetheros/branding/aetheros-wallpaper.svg
-if command -v xfconf-query >/dev/null 2>&1; then
-  xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s "$WALLPAPER" 2>/dev/null || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "$WALLPAPER" 2>/dev/null || true
-  xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-style -n -t int -s 5 2>/dev/null || true
+WALLPAPER=/usr/share/aetheros/branding/aetheros-wallpaper-mountain.svg
+if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+    plasma-apply-wallpaperimage "$WALLPAPER" || true
+elif command -v xfconf-query >/dev/null 2>&1; then
+    xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s "$WALLPAPER" 2>/dev/null || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "$WALLPAPER" 2>/dev/null || true
+    xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-style -n -t int -s 5 2>/dev/null || true
 fi
