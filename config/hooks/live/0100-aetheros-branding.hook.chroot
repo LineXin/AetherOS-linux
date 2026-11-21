@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-# Keep AetherOS identity files as locally diverted files across package upgrades.
+# Keep AetherOS identity files locally diverted from package-owned replacements.
 for path in /usr/lib/os-release /etc/issue /etc/issue.net /etc/lsb-release; do
     if [ -e "$path" ] || [ -L "$path" ]; then
         dpkg-divert --local --quiet --add "$path" || true
@@ -8,7 +8,7 @@ for path in /usr/lib/os-release /etc/issue /etc/issue.net /etc/lsb-release; do
 done
 install -D -m 0644 /etc/aetheros/os-release /usr/lib/os-release
 ln -sfn ../usr/lib/os-release /etc/os-release
-printf '%s\n' 'aetheros' > /etc/hostname
+printf '%s\n' aetheros > /etc/hostname
 cat > /etc/hosts <<'EOF'
 127.0.0.1 localhost
 127.0.1.1 aetheros
@@ -17,13 +17,16 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 EOF
 if [ -f /etc/default/grub ]; then
-    if ! grep -q '^GRUB_DISTRIBUTOR=' /etc/default/grub; then
-        printf '\nGRUB_DISTRIBUTOR="AetherOS"\n' >> /etc/default/grub
-    else
+    if grep -q '^GRUB_DISTRIBUTOR=' /etc/default/grub; then
         sed -i 's/^GRUB_DISTRIBUTOR=.*/GRUB_DISTRIBUTOR="AetherOS"/' /etc/default/grub
+    else
+        printf '\nGRUB_DISTRIBUTOR="AetherOS"\n' >> /etc/default/grub
     fi
 fi
-install -D -m 0644 /usr/share/aetheros/branding/aetheros-wallpaper.svg /usr/share/backgrounds/aetheros-wallpaper.svg
+for asset in aetheros-wallpaper-mountain.svg aetheros-wallpaper-abstract.svg; do
+    install -D -m 0644 "/usr/share/aetheros/branding/$asset" "/usr/share/backgrounds/$asset"
+    install -D -m 0644 "/usr/share/aetheros/branding/$asset" "/usr/share/pixmaps/$asset"
+done
 chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper
-install -D -m 0644 /usr/share/aetheros/branding/aetheros-wallpaper.svg /usr/share/backgrounds/aetheros-wallpaper.svg
-install -D -m 0644 /usr/share/aetheros/branding/aetheros-wallpaper.svg /usr/share/pixmaps/aetheros-wallpaper.svg
+chmod 0644 /etc/sudoers.d/aetherhub
+visudo -cf /etc/sudoers.d/aetherhub
