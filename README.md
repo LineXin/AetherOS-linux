@@ -1,23 +1,41 @@
 # AetherOS Linux
 
-A Debian 13 (Trixie)-based Linux distribution project featuring XFCE and KDE Plasma desktop editions, Firefox, and the AetherHub settings center.
+A Debian-based Linux distribution project with a custom identity, XFCE and KDE Plasma desktop sessions, Fastfetch branding, original wallpapers, and the AetherHub settings center.
 
-> **Status:** Early development. The first CI build is a Debian Installer-based prototype with AetherOS branding and a preseed configuration. Desktop images and fully integrated AetherHub are not yet implemented.
+> **Status:** Active development. The repository contains live-build branding assets and a GTK4 AetherHub prototype. Always test generated ISOs in a virtual machine before installing on physical hardware.
 
-## Planned editions
-- **AetherOS XFCE** — lightweight desktop
-- **AetherOS KDE** — KDE Plasma desktop
+## Desktop environments
+
+The current package list includes both XFCE and KDE Plasma sessions. The login manager lets users select the desktop session. The current wallpaper helper supports both desktops.
+
+## AetherOS identity
+
+- Name: AetherOS
+- ID: `aetheros`
+- ID_LIKE: `debian`
+- Tagline: **PURE. FAST. REFINED.**
+- Default hostname: `aetheros`
+
+## Branding assets
+
+- `config/includes.chroot/usr/share/aetheros/branding/aetheros.txt` — Fastfetch ASCII logo
+- `aetheros-logo.svg` — graphical mark
+- `aetheros-wallpaper-mountain.svg` — mountain dusk wallpaper
+- `aetheros-wallpaper-abstract.svg` — graphite/orange abstract wallpaper
+
+## AetherHub
+
+A native GTK4 application with Overview, Performance, Services, Appearance, and About sections. It uses a restricted helper for CPU governor, swappiness, ZRAM, and selected system services. Hardware and service availability varies.
 
 ## Build
-GitHub Actions currently produces a prototype installer ISO by downloading the official Debian 13 amd64 netinst image and adding project branding and installer configuration.
 
-Run **Actions → Build AetherOS Installer → Run workflow**. The ISO is uploaded as a workflow artifact.
+Run `bash scripts/prepare-live-build.sh` before your live-build command. The script sets executable permissions on chroot hooks and helper scripts.
 
 ## Project
-- Base: Debian 13 Trixie
-- Architecture: amd64
-- Installer: Debian Installer (prototype)
-- Browser: Firefox (planned in the installed system)
-- Settings center: AetherHub (planned)
 
-This project is not affiliated with Debian.
+- Base: Debian
+- Desktop: XFCE + KDE Plasma
+- Architecture: amd64 (current CI target)
+- Settings center: AetherHub
+
+AetherOS is an independent project and is not affiliated with Debian.
