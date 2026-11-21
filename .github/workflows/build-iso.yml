@@ -1,0 +1,38 @@
+name: Build AetherOS Installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'installer/**'
+      - 'scripts/**'
+      - 'config/**'
+      - '.github/workflows/build-iso.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y curl xorriso
+
+      - name: Build installer ISO
+        run: bash scripts/build.sh
+
+      - name: Verify ISO
+        run: test -s output/AetherOS-13-amd64-Installer.iso
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AetherOS-13-amd64-Installer
+          path: output/*.iso
+          retention-days: 7
