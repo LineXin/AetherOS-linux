@@ -21,3 +21,13 @@ The GTK4 prototype offers CPU governor, vm.swappiness, ZRAM service, Bluetooth/C
 The SVG asset is installed under `/usr/share/aetheros/branding/`, and copied to `/usr/share/backgrounds/` and `/usr/share/pixmaps/`. The GRUB distributor label is configured; a graphical GRUB theme still needs its own theme assets and bootloader configuration.
 
 The hook diverts `/usr/lib/os-release`, `/etc/issue`, `/etc/issue.net`, and `/etc/lsb-release`. Hostname and hosts are written directly. This does not prevent an administrator or another package from intentionally replacing them.
+
+## Desktop support and wallpapers
+
+The current image package list includes XFCE and KDE Plasma sessions. The login autostart entry invokes `/usr/local/bin/aetheros-wallpaper`, which detects Plasma's `plasma-apply-wallpaperimage` or XFCE's `xfconf-query`. AetherHub can select either approved SVG wallpaper. The assets are stored in `/usr/share/aetheros/branding/` and copied to `/usr/share/backgrounds/` and `/usr/share/pixmaps/`.
+
+Two original vector wallpapers are included:
+- `aetheros-wallpaper-mountain.svg`
+- `aetheros-wallpaper-abstract.svg`
+
+Both are resolution-independent SVG files with a 2560×1440 viewBox.
