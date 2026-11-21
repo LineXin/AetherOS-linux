@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+# Privileged allow-listed helper for AetherHub. Usage: aetheros-tune governor|swappiness|zram|service ...
+case "${1:-}" in
+  governor)
+    [ "$#" -eq 2 ] || exit 2
+    value="$2"
+    case "$value" in performance|powersave|schedutil|ondemand|conservative) ;; *) echo "Unsupported governor" >&2; exit 2;; esac
+    found=0
+    for file in /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_governor; do
+      [ -w "$file" ] || continue
+      available=" $(cat "${file%scaling_governor}scaling_available_governors" 2>/dev/null || true) "
+      case "$available" in *" $value "*) printf '%s\n' "$value" > "$file"; found=1;; esac
+    done
+    [ "$found" -eq 1 ] || { echo "Governor not supported by this CPU driver" >&2; exit 1; }
+    ;;
+  swappiness)
+    [ "$#" -eq 2 ] || exit 2
+    case "$2" in ''|*[!0-9]*) exit 2;; esac
+    [ "$2" -le 100 ] || exit 2
+    sysctl -w "vm.swappiness=$2"
+    ;;
+  zram)
+    [ "$#" -eq 2 ] || exit 2
+    case "$2" in enable) systemctl enable --now zramswap.service;; disable) systemctl disable --now zramswap.service;; status) systemctl is-active zramswap.service || true;; *) exit 2;; esac
+    ;;
+  service)
+    [ "$#" -eq 3 ] || exit 2
+    unit="$2"
+    action="$3"
+    case "$unit" in bluetooth|cups|thermald) ;; *) echo "Service not allowed" >&2; exit 2;; esac
+    case "$action" in start|stop|enable|disable|status) ;; *) exit 2;; esac
+    systemctl "$action" "$unit.service"
+    ;;
+  *) echo "Usage: aetheros-tune governor VALUE | swappiness 0..100 | zram enable|disable|status | service bluetooth|cups|thermald start|stop|enable|disable|status" >&2; exit 2;;
+esac
