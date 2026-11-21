@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+# Safe defaults; do not force a CPU governor (hardware/driver dependent).
+install -d -m 0755 /etc/sysctl.d
+cat > /etc/sysctl.d/90-aetheros.conf <<'EOF'
+vm.swappiness=60
+EOF
+# Ensure new users receive the default Fastfetch config and shell greeting.
+install -d -m 0755 /etc/skel/.config/fastfetch /etc/skel/.bashrc.d
+# Enable a greeting for Bash users without modifying existing user dotfiles.
+if ! grep -q '90-aetheros-fastfetch.sh' /etc/skel/.bashrc 2>/dev/null; then
+    printf '\n[ -r "$HOME/.bashrc.d/90-aetheros-fastfetch.sh" ] && . "$HOME/.bashrc.d/90-aetheros-fastfetch.sh"\n' >> /etc/skel/.bashrc
+fi
