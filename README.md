@@ -20,9 +20,9 @@ The GitHub Actions workflow builds both Live ISO editions and publishes them to 
 5. Reconstruct the ISO:
 
     cat AetherOS-13.8.0-amd64-XFCE.iso.part-* > AetherOS-13.8.0-amd64-XFCE.iso
-    sha256sum -c SHA256SUMS
+    sha256sum --ignore-missing -c SHA256SUMS
 
-For KDE, replace XFCE with KDE in the filenames. The repository also includes scripts/join-release-iso.sh.
+For KDE, replace XFCE with KDE in the filenames. Or use the helper: bash scripts/join-release-iso.sh AetherOS-13.8.0-amd64-XFCE.iso.part- AetherOS-13.8.0-amd64-XFCE.iso
 
 You can also push a version tag beginning with v to trigger publishing.
 
