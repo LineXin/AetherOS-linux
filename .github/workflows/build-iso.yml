@@ -1,38 +1,65 @@
-name: Build AetherOS Installer
+name: Build and publish AetherOS Live ISO
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release tag (example: v0.1.0)"
+        required: true
+        type: string
+        default: "v0.1.0"
   push:
-    branches: [main]
-    paths:
-      - 'installer/**'
-      - 'scripts/**'
-      - 'config/**'
-      - '.github/workflows/build-iso.yml'
+    tags:
+      - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build:
+  build-and-release:
+    name: Build XFCE + KDE and publish Release
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 180
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y curl xorriso
+      - name: Install ISO tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl xorriso
 
-      - name: Build installer ISO
+      - name: Build both Live ISO editions
         run: bash scripts/build.sh
 
-      - name: Verify ISO
-        run: test -s output/AetherOS-13-amd64-Installer.iso
+      - name: Verify release files
+        run: |
+          test -s output/AetherOS-13.8.0-amd64-XFCE.iso
+          test -s output/AetherOS-13.8.0-amd64-KDE.iso
+          sha256sum output/*.iso | tee output/SHA256SUMS
 
-      - name: Upload ISO artifact
-        uses: actions/upload-artifact@v4
+      - name: Prepare release description
+        run: |
+          cp RELEASE_NOTES.md output/RELEASE_NOTES.md
+          {
+            echo
+            echo "## SHA256 checksums"
+            echo
+            echo 'text'
+            cat output/SHA256SUMS
+            echo 'text'
+          } >> output/RELEASE_NOTES.md
+
+      - name: Publish ISO files to GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          name: AetherOS-13-amd64-Installer
-          path: output/*.iso
-          retention-days: 7
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          name: AetherOS ${{ inputs.release_tag || github.ref_name }}
+          body_path: output/RELEASE_NOTES.md
+          files: |
+            output/AetherOS-13.8.0-amd64-XFCE.iso
+            output/AetherOS-13.8.0-amd64-KDE.iso
+            output/SHA256SUMS
+          draft: false
+          prerelease: true
+          fail_on_unmatched_files: true
