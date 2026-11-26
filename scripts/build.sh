@@ -30,7 +30,7 @@ for desktop in xfce kde; do
     -map "$BRANDING/aetheros-wallpaper-abstract.svg" /AETHEROS/branding/aetheros-wallpaper-abstract.svg \
     -boot_image any replay
   test -s "$output_iso"
-  sha256sum "$output_iso" >> "$OUT/SHA256SUMS"
+  (cd "$OUT" && sha256sum "$output_name" >> SHA256SUMS)
   echo "Splitting $output_name into GitHub Release-compatible chunks..."
   split --bytes=1900M --numeric-suffixes=1 --suffix-length=2 "$output_iso" "$OUT/$output_name.part-"
   rm -f "$source_iso" "$output_iso"
