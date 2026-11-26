@@ -14,7 +14,7 @@ Each ISO is split into numbered parts because GitHub limits an individual Releas
 Keep all parts for one edition in the same directory and run:
 
     cat AetherOS-13.8.0-amd64-XFCE.iso.part-* > AetherOS-13.8.0-amd64-XFCE.iso
-    sha256sum -c SHA256SUMS
+    sha256sum --ignore-missing -c SHA256SUMS
 
 For KDE, replace XFCE with KDE in both filenames. SHA256SUMS contains hashes of the complete reconstructed ISO files.
 
