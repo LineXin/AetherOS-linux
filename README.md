@@ -1,41 +1,33 @@
 # AetherOS Linux
 
-A Debian-based Linux distribution project with a custom identity, XFCE and KDE Plasma desktop sessions, Fastfetch branding, original wallpapers, and the AetherHub settings center.
+A Debian-based Linux distribution project with a custom identity, XFCE and KDE Plasma desktop editions, Fastfetch branding, original wallpapers, and the AetherHub settings center.
 
-> **Status:** Active development. The repository contains live-build branding assets and a GTK4 AetherHub prototype. Always test generated ISOs in a virtual machine before installing on physical hardware.
+> **Status:** Development. The current CI pipeline repacks official Debian Live images with AetherOS project assets. Full integration of chroot hooks, package lists, wallpapers, and AetherHub into the live root filesystem is still in progress.
 
-## Desktop environments
+## Desktop editions
 
-The current package list includes both XFCE and KDE Plasma sessions. The login manager lets users select the desktop session. The current wallpaper helper supports both desktops.
+- **AetherOS XFCE** — Debian 13.8.0 XFCE Live base.
+- **AetherOS KDE** — Debian 13.8.0 KDE Live base.
 
-## AetherOS identity
+## Build and publish
 
-- Name: AetherOS
-- ID: `aetheros`
-- ID_LIKE: `debian`
-- Tagline: **PURE. FAST. REFINED.**
-- Default hostname: `aetheros`
+The GitHub Actions workflow builds both Live ISO editions and publishes them to **GitHub Releases**, not expiring workflow artifacts.
 
-## Branding assets
+1. Open Actions → Build and publish AetherOS Live ISO.
+2. Select Run workflow and enter a release tag, for example v0.1.0.
+3. Open Releases after the workflow succeeds.
+4. Download all numbered parts for the chosen desktop edition and SHA256SUMS.
+5. Reconstruct the ISO:
 
-- `config/includes.chroot/usr/share/aetheros/branding/aetheros.txt` — Fastfetch ASCII logo
-- `aetheros-logo.svg` — graphical mark
-- `aetheros-wallpaper-mountain.svg` — mountain dusk wallpaper
-- `aetheros-wallpaper-abstract.svg` — graphite/orange abstract wallpaper
+    cat AetherOS-13.8.0-amd64-XFCE.iso.part-* > AetherOS-13.8.0-amd64-XFCE.iso
+    sha256sum -c SHA256SUMS
 
-## AetherHub
+For KDE, replace XFCE with KDE in the filenames. The repository also includes scripts/join-release-iso.sh.
 
-A native GTK4 application with Overview, Performance, Services, Appearance, and About sections. It uses a restricted helper for CPU governor, swappiness, ZRAM, and selected system services. Hardware and service availability varies.
+You can also push a version tag beginning with v to trigger publishing.
 
-## Build
+## Current build limitation
 
-Run `bash scripts/prepare-live-build.sh` before your live-build command. The script sets executable permissions on chroot hooks and helper scripts.
-
-## Project
-
-- Base: Debian
-- Desktop: XFCE + KDE Plasma
-- Architecture: amd64 (current CI target)
-- Settings center: AetherHub
+The current script downloads official Debian Live XFCE and KDE images, verifies upstream SHA256 checksums, and adds AetherOS project files under /AETHEROS/ inside each ISO. It does not yet replace Debian's live root filesystem with the custom files under config/includes.chroot/. The project is working toward a fully integrated live-build image.
 
 AetherOS is an independent project and is not affiliated with Debian.
