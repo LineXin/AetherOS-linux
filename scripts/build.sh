@@ -1,27 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$ROOT/output"
 WORK="$ROOT/work"
-ISO_URL="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-13.8.0-amd64-netinst.iso"
+DEBIAN_VERSION="13.8.0"
+BASE_URL="https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid"
+SUMS_URL="$BASE_URL/SHA256SUMS"
+BRANDING="$ROOT/config/includes.chroot/usr/share/aetheros/branding"
 
 mkdir -p "$OUT" "$WORK"
+rm -f "$OUT"/*.iso
 cd "$WORK"
 
-echo "Downloading Debian 13 installer ISO..."
-curl -fL --retry 3 "$ISO_URL" -o debian-netinst.iso
+echo "Downloading official Debian Live SHA256SUMS..."
+curl -fL --retry 4 --retry-delay 3 "$SUMS_URL" -o SHA256SUMS
 
-echo "Preparing AetherOS-branded installer prototype..."
-mkdir -p overlay
-cp "$ROOT/installer/preseed/aetheros.cfg" overlay/aetheros-preseed.cfg
-cp "$ROOT/README.md" overlay/AETHEROS-README.txt
+for desktop in xfce kde; do
+    upper="$(printf '%s' "$desktop" | tr '[:lower:]' '[:upper:]')"
+    iso_name="debian-live-${DEBIAN_VERSION}-amd64-${desktop}.iso"
+    source_iso="$WORK/$iso_name"
+    output_iso="$OUT/AetherOS-${DEBIAN_VERSION}-amd64-${upper}.iso"
 
-# Prototype: preserve the official Debian installer and add project files
-# as a separate ISO payload. Full installer integration is a future milestone.
-xorriso -indev debian-netinst.iso -outdev "$OUT/AetherOS-13-amd64-Installer.iso" \
-  -map overlay/aetheros-preseed.cfg /AETHEROS-PRESEED.cfg \
-  -map overlay/AETHEROS-README.txt /AETHEROS-README.txt \
-  -boot_image any replay
+    echo "Downloading Debian Live ${DEBIAN_VERSION} (${upper})..."
+    curl -fL --retry 4 --retry-delay 3 "$BASE_URL/$iso_name" -o "$source_iso"
 
-echo "ISO created: $OUT/AetherOS-13-amd64-Installer.iso"
+    echo "Verifying SHA256 for $iso_name..."
+    grep -E "[[:space:]]${iso_name//./\\.}$" SHA256SUMS | sha256sum --check -
+
+    echo "Adding AetherOS project branding to ${upper} live image..."
+    xorriso -indev "$source_iso" -outdev "$output_iso" \
+        -map "$ROOT/README.md" /AETHEROS-README.txt \
+        -map "$BRANDING/aetheros.txt" /AETHEROS/branding/aetheros.txt \
+        -map "$BRANDING/aetheros-logo.svg" /AETHEROS/branding/aetheros-logo.svg \
+        -map "$BRANDING/aetheros-wallpaper-mountain.svg" /AETHEROS/branding/aetheros-wallpaper-mountain.svg \
+        -map "$BRANDING/aetheros-wallpaper-abstract.svg" /AETHEROS/branding/aetheros-wallpaper-abstract.svg \
+        -boot_image any replay
+
+    test -s "$output_iso"
+    echo "Created: $output_iso"
+done
+
+echo "Both AetherOS Live ISO images were created successfully."
