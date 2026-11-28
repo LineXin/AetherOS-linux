@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install AetherOS
+GenericName=System Installer
+Comment=Install AetherOS to your hard drive
+Exec=pkexec calamares
+Icon=aetheros
+Terminal=false
+Categories=System;
+Keywords=installer;calamares;system;

@@ -20,9 +20,11 @@ strings:
     releaseNotesUrl:     https://github.com/LineXin/AetherOS-linux
 
 images:
-    productLogo:         "/usr/share/pixmaps/aetheros.svg"
-    productIcon:         "/usr/share/pixmaps/aetheros.svg"
-    productWelcome:      "/usr/share/pixmaps/aetheros.svg"
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
 
 style:
    sidebarBackground:    "#11151d"

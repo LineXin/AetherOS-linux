@@ -37,6 +37,23 @@ fi
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
     gtk-update-icon-cache -f /usr/share/icons/hicolor || true
 fi
+
+# Render AetherOS SVG logo to PNG for Calamares branding and force aetheros branding
+if command -v python3 >/dev/null 2>&1 && [ -d /etc/calamares/branding/aetheros ]; then
+    python3 - <<'PY' || true
+import gi
+gi.require_version("GdkPixbuf", "2.0")
+from gi.repository import GdkPixbuf
+src = "/usr/share/aetheros/branding/aetheros-logo.svg"
+for name, size in [("logo.png", 128), ("icon.png", 64), ("welcome.png", 256)]:
+    pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, size, size, True)
+    pb.savev(f"/etc/calamares/branding/aetheros/{name}", "png", [], [])
+PY
+fi
+if [ -f /etc/calamares/settings.conf ]; then
+    sed -i 's/^branding:.*/branding: aetheros/' /etc/calamares/settings.conf
+fi
+rm -f /usr/share/applications/install-debian.desktop
 if [ -f /etc/calamares/settings.conf ]; then
     sed -i 's/^branding:.*/branding: aetheros/' /etc/calamares/settings.conf
 else
