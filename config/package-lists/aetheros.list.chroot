@@ -1,8 +1,16 @@
 live-boot
 live-config
 live-config-systemd
+user-setup
+libpam-systemd
 systemd-sysv
 sudo
+xserver-xorg
+xserver-xorg-video-all
+xserver-xorg-input-all
+x11-xserver-utils
+xinit
+dbus-x11
 network-manager-gnome
 xfce4
 xfce4-terminal
