@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+rm -rf /var/cache/apt/archives/*.deb /var/lib/apt/lists/* \
+  /usr/share/doc/* /usr/share/man/* /usr/share/info/* /usr/share/lintian/* \
+  /tmp/* /var/tmp/*
+if [ -d /usr/share/locale ]; then
+  find /usr/share/locale -mindepth 1 -maxdepth 1 \
+    ! -name 'en*' ! -name 'ru*' ! -name 'locale.alias' -exec rm -rf {} +
+fi

@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+for cfg in \
+  binary/boot/grub/grub.cfg \
+  binary/isolinux/menu.cfg \
+  binary/isolinux/live.cfg \
+  binary/isolinux/stdmenu.cfg \
+  binary/syslinux/menu.cfg \
+  binary/syslinux/live.cfg; do
+  if [ -f "$cfg" ]; then
+    sed -i 's/Debian GNU\/Linux/AetherOS/g; s/Debian Live/AetherOS Live/g; s/Debian/AetherOS/g' "$cfg"
+  fi
+done
+rm -f binary/boot/grub/splash.png binary/isolinux/splash.png binary/syslinux/splash.png
