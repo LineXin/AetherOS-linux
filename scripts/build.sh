@@ -73,7 +73,7 @@ if [ -d "$WORK/squashfs-root/usr/share/locale" ]; then
 fi
 
 echo "Repacking filesystem.squashfs (zstd)..."
-sudo mksquashfs "$WORK/squashfs-root" "$WORK/filesystem.squashfs.new" -comp zstd -Xcompression-level 19 -b 1M -processors "$(nproc)" -noappend
+sudo mksquashfs "$WORK/squashfs-root" "$WORK/filesystem.squashfs.new" -comp zstd -Xcompression-level 10 -b 1M -processors "$(nproc)" -noappend
 sudo rm -rf "$WORK/squashfs-root"
 
 echo "Building ${output_name}..."
