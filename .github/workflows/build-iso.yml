@@ -16,15 +16,24 @@ jobs:
   build-and-release:
     name: Build XFCE and publish Release
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 45
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
       - name: Install ISO tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xorriso squashfs-tools
+          sudo apt-get install -y aria2 curl xorriso squashfs-tools
+      - name: Cache Debian Live base ISO
+        uses: actions/cache@v4
+        with:
+          path: |
+            work/debian-live-13.8.0-amd64-xfce.iso
+            work/SHA256SUMS
+          key: debian-live-13.8.0-amd64-xfce
       - name: Build and split XFCE Live ISO
+        env:
+          KEEP_SOURCE_ISO: "1"
         run: bash scripts/build.sh
       - name: Verify release payload
         run: |

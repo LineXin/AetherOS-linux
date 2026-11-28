@@ -24,16 +24,24 @@ output_name="AetherOS-${DEBIAN_VERSION}-amd64-${upper}.iso"
 output_iso="$OUT/$output_name"
 
 echo "Downloading Debian Live ${DEBIAN_VERSION} (${upper})..."
-curl -fL --retry 4 --retry-delay 3 "$BASE_URL/$iso_name" -o "$source_iso"
-
-echo "Verifying upstream SHA256..."
-grep -E "[[:space:]]${iso_name//./\\.}$" SHA256SUMS | sha256sum --check -
+if [ -f "$source_iso" ] && grep -E "[[:space:]]${iso_name//./\\.}$" SHA256SUMS | sha256sum --check - >/dev/null 2>&1; then
+  echo "Using cached $iso_name (SHA256 verified)."
+else
+  rm -f "$source_iso"
+  if command -v aria2c >/dev/null 2>&1; then
+    aria2c -x 16 -s 16 -k 1M --file-allocation=none -d "$WORK" -o "$iso_name" "$BASE_URL/$iso_name"
+  else
+    curl -fL --retry 4 --retry-delay 3 "$BASE_URL/$iso_name" -o "$source_iso"
+  fi
+  echo "Verifying upstream SHA256..."
+  grep -E "[[:space:]]${iso_name//./\\.}$" SHA256SUMS | sha256sum --check -
+fi
 
 echo "Extracting live/filesystem.squashfs..."
 xorriso -osirrox on -indev "$source_iso" -extract /live/filesystem.squashfs "$WORK/filesystem.squashfs"
 
 echo "Unpacking squashfs root..."
-sudo unsquashfs -d "$WORK/squashfs-root" "$WORK/filesystem.squashfs"
+sudo unsquashfs -processors "$(nproc)" -d "$WORK/squashfs-root" "$WORK/filesystem.squashfs"
 rm -f "$WORK/filesystem.squashfs"
 
 echo "Applying config/includes.chroot/..."
@@ -49,8 +57,23 @@ for hook in "$ROOT"/config/hooks/live/*.hook.chroot; do
   sudo rm -f "$WORK/squashfs-root/tmp/$hook_name"
 done
 
-echo "Repacking filesystem.squashfs..."
-sudo mksquashfs "$WORK/squashfs-root" "$WORK/filesystem.squashfs.new" -comp xz -noappend
+echo "Trimming unnecessary files to reduce ISO size..."
+sudo rm -rf \
+  "$WORK/squashfs-root/var/cache/apt/archives/"*.deb \
+  "$WORK/squashfs-root/var/lib/apt/lists/"* \
+  "$WORK/squashfs-root/usr/share/doc/"* \
+  "$WORK/squashfs-root/usr/share/man/"* \
+  "$WORK/squashfs-root/usr/share/info/"* \
+  "$WORK/squashfs-root/usr/share/lintian/"* \
+  "$WORK/squashfs-root/tmp/"* \
+  "$WORK/squashfs-root/var/tmp/"*
+if [ -d "$WORK/squashfs-root/usr/share/locale" ]; then
+  sudo find "$WORK/squashfs-root/usr/share/locale" -mindepth 1 -maxdepth 1 \
+    ! -name 'en*' ! -name 'ru*' ! -name 'locale.alias' -exec rm -rf {} +
+fi
+
+echo "Repacking filesystem.squashfs (zstd)..."
+sudo mksquashfs "$WORK/squashfs-root" "$WORK/filesystem.squashfs.new" -comp zstd -Xcompression-level 19 -b 1M -processors "$(nproc)" -noappend
 sudo rm -rf "$WORK/squashfs-root"
 
 echo "Building ${output_name}..."
@@ -63,7 +86,10 @@ xorriso -indev "$source_iso" -outdev "$output_iso" \
   -map "$BRANDING/aetheros-wallpaper-abstract.svg" /AETHEROS/branding/aetheros-wallpaper-abstract.svg \
   -boot_image any replay
 
-rm -f "$WORK/filesystem.squashfs.new" "$source_iso"
+rm -f "$WORK/filesystem.squashfs.new"
+if [ "${KEEP_SOURCE_ISO:-0}" != "1" ]; then
+  rm -f "$source_iso"
+fi
 test -s "$output_iso"
 
 (cd "$OUT" && sha256sum "$output_name" >> SHA256SUMS)
