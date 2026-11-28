@@ -15,6 +15,14 @@ on:
         options:
           - xfce
           - gnome
+      build_mode:
+        description: "Build mode (fast_repack updates latest release; full_live_build builds from scratch)"
+        required: true
+        type: choice
+        default: "fast_repack"
+        options:
+          - fast_repack
+          - full_live_build
   push:
     tags:
       - "v*"
@@ -31,13 +39,22 @@ jobs:
       - name: Build and split Live ISO in Debian Trixie container
         env:
           AETHEROS_DE: ${{ inputs.desktop_environment || 'xfce' }}
+          BUILD_MODE: ${{ inputs.build_mode || 'fast_repack' }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
+          SCRIPT="scripts/repack-latest.sh"
+          if [ "$BUILD_MODE" = "full_live_build" ]; then
+            SCRIPT="scripts/build.sh"
+          fi
           docker run --rm --privileged \
             -e AETHEROS_DE="$AETHEROS_DE" \
+            -e GH_TOKEN="$GH_TOKEN" \
+            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
             -v "${{ github.workspace }}:/workspace" \
             -w /workspace \
             debian:trixie \
-            bash -c "apt-get update && apt-get install -y live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin rustc cargo libgtk-4-dev pkg-config && bash scripts/build.sh \"\$AETHEROS_DE\""
+            bash -c "apt-get update && apt-get install -y curl python3 live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin rustc cargo libgtk-4-dev pkg-config && bash \"$SCRIPT\" \"\$AETHEROS_DE\""
           sudo chown -R "$(id -u):$(id -g)" output
       - name: Verify release payload
         run: |
