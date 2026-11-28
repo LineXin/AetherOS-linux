@@ -14,7 +14,7 @@ permissions:
   contents: write
 jobs:
   build-and-release:
-    name: Build XFCE + KDE and publish Release
+    name: Build XFCE and publish Release
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -23,14 +23,13 @@ jobs:
       - name: Install ISO tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y curl xorriso
-      - name: Build and split both Live ISO editions
+          sudo apt-get install -y curl xorriso squashfs-tools
+      - name: Build and split XFCE Live ISO
         run: bash scripts/build.sh
       - name: Verify release payload
         run: |
           test -s output/SHA256SUMS
           test -n "$(find output -maxdepth 1 -name 'AetherOS-13.8.0-amd64-XFCE.iso.part-*' -print -quit)"
-          test -n "$(find output -maxdepth 1 -name 'AetherOS-13.8.0-amd64-KDE.iso.part-*' -print -quit)"
           while IFS= read -r part; do
             size=$(stat -c '%s' "$part")
             test "$size" -lt 2000000000
