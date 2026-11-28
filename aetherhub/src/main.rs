@@ -217,7 +217,16 @@ fn install_css() {
     let css = CssProvider::new();
     css.load_from_data(
         "
-        .window-bg { background: #11151d; color: #e8ebf2; }
+        window, headerbar, .window-bg { background: #11151d; color: #e8ebf2; }
+        headerbar { border-bottom: 1px solid #2b3444; box-shadow: none; }
+        headerbar button, headerbar windowcontrols button { background: transparent; color: #e8ebf2; border: none; }
+        headerbar button:hover { background: #1c2330; }
+        stacksidebar, stacksidebar list, listview { background: #11151d; color: #d5dce8; border: none; }
+        stacksidebar row { background: transparent; color: #c7d0df; border-radius: 7px; padding: 4px 8px; }
+        stacksidebar row:hover { background: #1c2330; color: #f3f4f7; }
+        stacksidebar row:selected { background: #2b3545; color: #ffffff; border-radius: 7px; }
+        separator { background: #2b3444; min-width: 1px; min-height: 1px; }
+        scrolledwindow, viewport { background: transparent; }
         .brand-symbol { color: #f17850; font-size: 36px; }
         .brand-name { font-size: 19px; font-weight: 700; color: #f3f4f7; }
         .eyebrow { color: #929bab; font-size: 9px; letter-spacing: 1.6px; }
@@ -228,16 +237,21 @@ fn install_css() {
         .field-value { color: #f1f3f7; font-size: 14px; font-weight: 600; }
         .secondary { color: #98a2b3; font-size: 12px; }
         .mono { font-family: monospace; font-size: 12px; color: #d5dce8; }
-        button { border-radius: 7px; padding: 7px 12px; }
-        button.suggested-action { background: #e96f4b; color: white; }
-        stacksidebar row:selected { background: #2b3545; border-radius: 7px; }
+        button { background: #1c2330; color: #e8ebf2; border: 1px solid #2b3444; border-radius: 7px; padding: 7px 12px; }
+        button:hover { background: #252e3f; }
+        button.suggested-action { background: #e96f4b; color: #ffffff; border-color: #e96f4b; }
+        button.suggested-action:hover { background: #f17850; }
+        entry, dropdown > button, spinbutton { background: #161b26; color: #e8ebf2; border: 1px solid #2b3444; border-radius: 6px; }
+        textview, textview text { background: #161b26; color: #d5dce8; }
+        switch { background: #2b3444; border-radius: 12px; }
+        switch:checked { background: #e96f4b; }
         ",
     );
     if let Some(display) = Display::default() {
         gtk4::style_context_add_provider_for_display(
             &display,
             &css,
-            STYLE_PROVIDER_PRIORITY_APPLICATION,
+            gtk4::STYLE_PROVIDER_PRIORITY_USER,
         );
     }
 }

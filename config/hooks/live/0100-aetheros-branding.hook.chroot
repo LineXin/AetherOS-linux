@@ -27,6 +27,14 @@ for asset in aetheros-wallpaper-mountain.svg aetheros-wallpaper-abstract.svg; do
     install -D -m 0644 "/usr/share/aetheros/branding/$asset" "/usr/share/backgrounds/$asset"
     install -D -m 0644 "/usr/share/aetheros/branding/$asset" "/usr/share/pixmaps/$asset"
 done
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/pixmaps/aetheros.svg
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/icons/hicolor/scalable/apps/aetheros.svg
+if [ -d /usr/share/gnome-background-properties ]; then
+    find /usr/share/gnome-background-properties -maxdepth 1 -type f -name '*.xml' ! -name 'aetheros-wallpapers.xml' -delete
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f /usr/share/icons/hicolor || true
+fi
 chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper
 chmod 0644 /etc/sudoers.d/aetherhub
 visudo -cf /etc/sudoers.d/aetherhub

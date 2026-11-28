@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
+<wallpapers>
+  <wallpaper deleted="false">
+    <name>AetherOS Mountain</name>
+    <filename>/usr/share/backgrounds/aetheros-wallpaper-mountain.svg</filename>
+    <options>zoom</options>
+  </wallpaper>
+  <wallpaper deleted="false">
+    <name>AetherOS Abstract</name>
+    <filename>/usr/share/backgrounds/aetheros-wallpaper-abstract.svg</filename>
+    <options>zoom</options>
+  </wallpaper>
+</wallpapers>
