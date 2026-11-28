@@ -77,7 +77,7 @@ The resulting split ISO parts and `SHA256SUMS` will be written to `output/`.
 
 | <a href="https://github.com/LineXin"><img src="https://github.com/LineXin.png?size=80" width="80" alt="LineXin" /></a> | <a href="https://github.com/kilib1k"><img src="https://github.com/kilib1k.png?size=80" width="80" alt="kilib1k" /></a> |
 | :---: | :---: |
-| [**LineXin**](https://github.com/LineXin)<br><sub>Creator</sub> | [**kilib1k**](https://github.com/kilib1k)<br><sub>Co-creator & Maintainer</sub> |
+| [**LineXin**](https://github.com/LineXin)<br><sub>Creator & Maintainer</sub> | [**kilib1k**](https://github.com/kilib1k)<br><sub>Developer</sub> |
 
 ---
 
