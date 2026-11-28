@@ -42,6 +42,9 @@ dest = f"/usr/share/gnome-shell/extensions/{uuid}"
 os.makedirs(dest, exist_ok=True)
 with zipfile.ZipFile(io.BytesIO(raw)) as zf:
     zf.extractall(dest)
+schemas_dir = os.path.join(dest, "schemas")
+if os.path.isdir(schemas_dir):
+    os.system(f"glib-compile-schemas '{schemas_dir}'")
 print(f"Installed GNOME extension {uuid} ({ext_id})")
 PY
     done

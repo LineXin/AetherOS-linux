@@ -276,7 +276,8 @@ fn build_ui(app: &Application) {
     sidebar.set_margin_end(14);
 
     let brand = GtkBox::new(Orientation::Horizontal, 10);
-    let symbol = styled_label("Ⓐ", Some("brand-symbol"));
+    let symbol = gtk4::Image::from_icon_name("aetherhub");
+    symbol.set_pixel_size(36);
     let brand_text = GtkBox::new(Orientation::Vertical, 1);
     brand_text.append(&styled_label("AetherHub", Some("brand-name")));
     brand_text.append(&styled_label("SYSTEM SETTINGS", Some("eyebrow")));

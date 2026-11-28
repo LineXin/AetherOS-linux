@@ -25,7 +25,7 @@ if [ "$(id -u)" -ne 0 ]; then
   SUDO="sudo"
 fi
 
-if command -v cargo >/dev/null 2>&1 && [ -f "$ROOT/aetherhub/Cargo.toml" ]; then
+if [ "$DE" = "gnome" ] && command -v cargo >/dev/null 2>&1 && [ -f "$ROOT/aetherhub/Cargo.toml" ]; then
   echo "Building AetherHub (Rust + GTK4)..."
   cargo build --release --manifest-path "$ROOT/aetherhub/Cargo.toml"
   install -D -m 0755 "$ROOT/aetherhub/target/release/aetherhub" \
@@ -41,6 +41,10 @@ cd "$BUILD_DIR"
 $SUDO lb clean --purge || true
 rm -rf config auto local
 cp -a "$ROOT/config" "$BUILD_DIR/config"
+if [ "$DE" != "gnome" ]; then
+  rm -f "$BUILD_DIR/config/includes.chroot/usr/local/bin/aetherhub" \
+        "$BUILD_DIR/config/includes.chroot/usr/share/applications/aetherhub.desktop"
+fi
 cp -f "$ROOT/config/packages/${DE}.txt" "$BUILD_DIR/config/package-lists/desktop.list.chroot"
 
 export MKSQUASHFS_OPTIONS="-b 1M -processors $(nproc)"

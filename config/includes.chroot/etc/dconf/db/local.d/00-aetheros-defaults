@@ -11,4 +11,4 @@ picture-options='zoom'
 picture-uri='file:///usr/share/backgrounds/aetheros-wallpaper-mountain.svg'
 
 [org/gnome/shell]
-enabled-extensions=['appindicatorsupport@rgcjonas.gmail.com', 'dash2dock-lite@micxgx.gmail.com', 'blur-my-shell@aunetx']
+enabled-extensions=['appindicatorsupport@rgcjonas.gmail.com', 'dash2dock-lite@icedman.github.com', 'blur-my-shell@aunetx']
