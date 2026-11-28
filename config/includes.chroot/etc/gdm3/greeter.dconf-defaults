@@ -1,0 +1,3 @@
+[org/gnome/login-screen]
+logo='/usr/share/pixmaps/aetheros.svg'
+disable-user-list=false

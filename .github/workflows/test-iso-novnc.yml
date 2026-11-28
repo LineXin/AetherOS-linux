@@ -20,6 +20,16 @@ on:
         required: true
         type: string
         default: "30"
+      disk_size_gb:
+        description: "Virtual disk size in GB for testing installation (0 = no disk)"
+        required: true
+        type: choice
+        default: "70"
+        options:
+          - "0"
+          - "40"
+          - "70"
+          - "80"
 permissions:
   contents: read
 jobs:
@@ -62,12 +72,18 @@ jobs:
           if [ -e /dev/kvm ]; then
             KVM_FLAG="-enable-kvm -cpu host"
           fi
+          DISK_FLAG=""
+          if [ "${{ inputs.disk_size_gb }}" != "0" ]; then
+            qemu-img create -f qcow2 test-iso/disk.qcow2 "${{ inputs.disk_size_gb }}G"
+            DISK_FLAG="-drive file=test-iso/disk.qcow2,format=qcow2,if=virtio"
+          fi
           sudo qemu-system-x86_64 \
             $KVM_FLAG \
             -smp 4 \
             -m 4096 \
             -vga virtio \
             -vnc 127.0.0.1:0 \
+            $DISK_FLAG \
             -cdrom test-iso/test.iso \
             -boot d \
             -daemonize

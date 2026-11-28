@@ -29,6 +29,8 @@ for asset in aetheros-wallpaper-mountain.svg aetheros-wallpaper-abstract.svg; do
 done
 install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/pixmaps/aetheros.svg
 install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/icons/hicolor/scalable/apps/aetheros.svg
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /etc/skel/.face
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/pixmaps/faces/aetheros.svg
 if [ -d /usr/share/gnome-background-properties ]; then
     find /usr/share/gnome-background-properties -maxdepth 1 -type f -name '*.xml' ! -name 'aetheros-wallpapers.xml' -delete
 fi

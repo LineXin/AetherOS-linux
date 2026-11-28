@@ -7,4 +7,5 @@ find config/hooks/normal -maxdepth 1 -type f -name '*.hook.binary' -exec chmod 0
 chmod 0755 config/includes.chroot/usr/local/sbin/aetheros-tune
 chmod 0755 config/includes.chroot/usr/local/bin/aetherhub
 chmod 0755 config/includes.chroot/usr/local/bin/aetheros-wallpaper
+chmod 0755 config/includes.chroot/usr/local/bin/aetheros-welcome
 echo "AetherOS live-build file modes prepared."
