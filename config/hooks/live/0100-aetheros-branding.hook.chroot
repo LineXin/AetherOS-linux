@@ -85,6 +85,8 @@ if [ -f /etc/calamares/modules/users.conf ]; then
     sed -i '/libpwquality:/,$d' /etc/calamares/modules/users.conf
 fi
 command -v calamares >/dev/null 2>&1 || { echo "ERROR: calamares binary is missing!" >&2; exit 1; }
-chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper
+for bin in /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper /usr/local/bin/aetheros-welcome; do
+    [ -f "$bin" ] && chmod 0755 "$bin"
+done
 chmod 0644 /etc/sudoers.d/aetherhub
 visudo -cf /etc/sudoers.d/aetherhub
