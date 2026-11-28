@@ -69,7 +69,17 @@ lb config \
   --win32-loader false \
   --firmware-binary false
 
-$SUDO lb build
+LOG_FILE="$OUT/lb-build.log"
+echo "Running live-build (compact log; full log at $LOG_FILE)..."
+set +e
+$SUDO lb build 2>&1 | tee "$LOG_FILE" | stdbuf -oL grep -E '^(P:|W:|E:|ERROR)'
+LB_RC=${PIPESTATUS[0]}
+set -e
+if [ "$LB_RC" -ne 0 ]; then
+  echo "ERROR: lb build failed (exit $LB_RC). Last 80 lines:" >&2
+  tail -n 80 "$LOG_FILE" >&2
+  exit "$LB_RC"
+fi
 
 BUILT_ISO="$(find "$BUILD_DIR" -maxdepth 1 -name '*.iso' -print -quit)"
 if [ -z "$BUILT_ISO" ] || [ ! -s "$BUILT_ISO" ]; then
