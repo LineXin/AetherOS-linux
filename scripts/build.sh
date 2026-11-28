@@ -45,6 +45,7 @@ if [ "$DE" != "gnome" ]; then
   rm -f "$BUILD_DIR/config/includes.chroot/usr/local/bin/aetherhub" \
         "$BUILD_DIR/config/includes.chroot/usr/share/applications/aetherhub.desktop"
 fi
+cp -f "$ROOT/config/packages/common.txt" "$BUILD_DIR/config/package-lists/common.list.chroot"
 cp -f "$ROOT/config/packages/${DE}.txt" "$BUILD_DIR/config/package-lists/desktop.list.chroot"
 
 export MKSQUASHFS_OPTIONS="-b 1M -processors $(nproc)"
