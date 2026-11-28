@@ -39,7 +39,11 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
 fi
 if [ -f /etc/calamares/settings.conf ]; then
     sed -i 's/^branding:.*/branding: aetheros/' /etc/calamares/settings.conf
+else
+    echo "ERROR: /etc/calamares/settings.conf is missing!" >&2
+    exit 1
 fi
+command -v calamares >/dev/null 2>&1 || { echo "ERROR: calamares binary is missing!" >&2; exit 1; }
 chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper
 chmod 0644 /etc/sudoers.d/aetherhub
 visudo -cf /etc/sudoers.d/aetherhub

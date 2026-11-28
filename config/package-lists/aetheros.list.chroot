@@ -27,3 +27,5 @@ libgtk-4-1
 libglib2.0-0
 iproute2
 iputils-ping
+calamares
+calamares-settings-debian
