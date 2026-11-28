@@ -84,7 +84,7 @@ $SUDO unsquashfs -d "$WORK/squashfs-root" "$WORK/filesystem.squashfs"
 rm -f "$WORK/filesystem.squashfs"
 
 echo "Overlaying config/includes.chroot/..."
-$SUDO cp -a "$ROOT/config/includes.chroot/." "$WORK/squashfs-root/"
+$SUDO cp -r --preserve=mode,timestamps "$ROOT/config/includes.chroot/." "$WORK/squashfs-root/"
 if [ "$DE" != "gnome" ]; then
   $SUDO rm -f "$WORK/squashfs-root/usr/local/bin/aetherhub" \
               "$WORK/squashfs-root/usr/share/applications/aetherhub.desktop"

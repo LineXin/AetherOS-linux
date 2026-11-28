@@ -102,5 +102,7 @@ command -v calamares >/dev/null 2>&1 || { echo "ERROR: calamares binary is missi
 for bin in /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper /usr/local/bin/aetheros-welcome; do
     [ -f "$bin" ] && chmod 0755 "$bin"
 done
-chmod 0644 /etc/sudoers.d/aetherhub
+chown -R root:root /etc/sudoers.d /etc/calamares /etc/dconf /etc/gtk-3.0 /etc/gtk-4.0 /etc/gdm3 /etc/xdg /etc/aetheros /usr/local /usr/share/aetheros 2>/dev/null || true
+chmod 0755 /etc/sudoers.d
+chmod 0440 /etc/sudoers.d/* 2>/dev/null || true
 visudo -cf /etc/sudoers.d/aetherhub
