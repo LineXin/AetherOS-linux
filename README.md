@@ -22,9 +22,10 @@ A Debian-based Linux distribution featuring a custom system identity, **XFCE** a
 | `config/includes.chroot/` | Files overlaid onto the live root filesystem (`/etc`, `/usr/share/aetheros`, `/usr/local/bin`, etc.) |
 | `config/hooks/live/` | Chroot hooks executed during ISO build (`0100-aetheros-branding`, `0200-aetheros-defaults`) |
 | `config/packages/` | Package lists for common, XFCE, GNOME, and AetherHub components |
-| `scripts/build.sh` | Downloads Debian 13.8.0 Live, unpacks squashfs, applies chroot branding/hooks, and repacks the ISO |
-| `scripts/join-release-iso.sh` | Helper to reconstruct split `.iso.part-*` files |
-| `.github/workflows/` | CI workflow for building and publishing GitHub Releases |
+| `scripts/build.sh` | Builds `aetherhub` (Rust/GTK4), runs `live-build` (`lb config` / `lb build`) for `xfce` or `gnome`, and splits the ISO into release parts |
+| `scripts/prepare-live-build.sh` | Sets executable permissions (`0755`) on chroot/binary hooks and `/usr/local` binaries |
+| `scripts/join-release-iso.sh` | Reconstructs a full `.iso` from split `.iso.part-*` files |
+| `.github/workflows/` | CI workflows for building/publishing Live ISOs and testing via noVNC |
 
 ---
 
@@ -50,10 +51,14 @@ bash scripts/join-release-iso.sh AetherOS-13.8.0-amd64-XFCE.iso.part- AetherOS-1
 
 ## Building Locally
 
-Requires a Debian/Ubuntu environment (native or WSL) with `curl`, `xorriso`, `squashfs-tools`, and `sudo` access:
+Requires a Debian/Ubuntu environment (native or WSL) with `live-build`, `debootstrap`, `squashfs-tools`, `xorriso`, `cargo` (for AetherHub), and `sudo` access:
 
 ```bash
-bash scripts/build.sh
+# Build XFCE edition (default)
+bash scripts/build.sh xfce
+
+# Build GNOME edition
+bash scripts/build.sh gnome
 ```
 
 The resulting split ISO parts and `SHA256SUMS` will be written to `output/`.
