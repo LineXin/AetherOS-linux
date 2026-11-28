@@ -38,7 +38,7 @@ lb config \
   --iso-application "AetherOS" \
   --iso-publisher "AetherOS" \
   --iso-volume "AetherOS-XFCE" \
-  --compression zstd \
+  --compression gzip \
   --apt-recommends false \
   --memtest none \
   --win32-loader false \
