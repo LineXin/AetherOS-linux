@@ -7,6 +7,14 @@ on:
         required: true
         type: string
         default: "v0.1.0"
+      desktop_environment:
+        description: "Desktop environment ISO to test"
+        required: true
+        type: choice
+        default: "xfce"
+        options:
+          - xfce
+          - gnome
       session_minutes:
         description: "How many minutes to keep noVNC running"
         required: true
@@ -40,9 +48,12 @@ jobs:
           mkdir -p test-iso
           gh release download "${{ inputs.release_tag }}" --dir test-iso --pattern "*.part-*" --pattern "SHA256SUMS"
           cd test-iso
-          cat AetherOS-13.8.0-amd64-XFCE.iso.part-* > AetherOS-13.8.0-amd64-XFCE.iso
-          grep "AetherOS-13.8.0-amd64-XFCE.iso$" SHA256SUMS | sha256sum --check -
+          DE_UPPER=$(echo "${{ inputs.desktop_environment }}" | tr '[:lower:]' '[:upper:]')
+          ISO_NAME="AetherOS-13.8.0-amd64-${DE_UPPER}.iso"
+          cat ${ISO_NAME}.part-* > "$ISO_NAME"
+          grep "${ISO_NAME}$" SHA256SUMS | sha256sum --check -
           rm -f *.part-*
+          mv "$ISO_NAME" test.iso
 
       - name: Start QEMU + noVNC and wait
         run: |
@@ -57,7 +68,7 @@ jobs:
             -m 4096 \
             -vga virtio \
             -vnc 127.0.0.1:0 \
-            -cdrom test-iso/AetherOS-13.8.0-amd64-XFCE.iso \
+            -cdrom test-iso/test.iso \
             -boot d \
             -daemonize
           websockify --web=/usr/share/novnc 6080 127.0.0.1:5900 &

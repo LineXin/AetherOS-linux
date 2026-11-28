@@ -5,7 +5,7 @@
       <stop offset="55%" stop-color="#0e1320"/>
       <stop offset="100%" stop-color="#171420"/>
     </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="22%" r="48%">
+    <radialGradient id="glow" cx="50%" cy="20%" r="48%">
       <stop offset="0%" stop-color="#ff713f" stop-opacity="0.28"/>
       <stop offset="55%" stop-color="#f04d38" stop-opacity="0.08"/>
       <stop offset="100%" stop-color="#070a12" stop-opacity="0"/>
@@ -29,7 +29,7 @@
   <rect width="1920" height="1080" fill="url(#bg)"/>
   <rect width="1920" height="1080" fill="url(#glow)"/>
 
-  <!-- Subtle grid dots / stars -->
+  <!-- Subtle stars -->
   <g fill="#ffffff" opacity="0.16">
     <circle cx="240" cy="140" r="1.5"/>
     <circle cx="460" cy="95" r="1"/>
@@ -46,20 +46,18 @@
   <path d="M0 950 L290 880 L540 945 L820 870 L1100 940 L1380 875 L1670 935 L1920 885 L1920 1080 L0 1080 Z" fill="#080b13"/>
   <path d="M0 950 Q480 910 960 948 T1920 930" fill="none" stroke="url(#horizon)" stroke-width="2.5"/>
 
-  <!-- Central dark panel for crisp boot menu legibility -->
-  <rect x="420" y="310" width="1080" height="510" rx="18" fill="#090d16" fill-opacity="0.72" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1.5"/>
+  <!-- Wide central dark panel so boot menu highlight stays inside -->
+  <rect x="300" y="345" width="1320" height="475" rx="18" fill="#090d16" fill-opacity="0.76" stroke="#ffffff" stroke-opacity="0.09" stroke-width="1.5"/>
 
-  <!-- AetherOS Emblem (top center) -->
-  <g transform="translate(960 155)" fill="none" stroke="url(#accent)" stroke-linecap="round" stroke-linejoin="round">
-    <circle r="76" stroke-width="7"/>
-    <path d="M-44 46 L0 -48 L44 46 M-26 11 H26" stroke-width="9"/>
+  <!-- AetherOS Emblem -->
+  <g transform="translate(960 140)" fill="none" stroke="url(#accent)" stroke-linecap="round" stroke-linejoin="round">
+    <circle r="72" stroke-width="7"/>
+    <path d="M-42 44 L0 -46 L42 44 M-24 10 H24" stroke-width="9"/>
   </g>
 
-  <!-- Wordmark -->
+  <!-- Wordmark + Tagline under logo (away from bottom boot hint) -->
   <g font-family="DejaVu Sans, sans-serif" text-anchor="middle">
-    <text x="960" y="275" fill="#f4f2f1" font-size="38" font-weight="bold" letter-spacing="14">AETHEROS</text>
+    <text x="960" y="258" fill="#f4f2f1" font-size="38" font-weight="bold" letter-spacing="14">AETHEROS</text>
+    <text x="960" y="294" fill="#ff9a77" fill-opacity="0.88" font-size="16" letter-spacing="7">PURE. FAST. REFINED.</text>
   </g>
-
-  <!-- Footer tagline -->
-  <text x="960" y="1020" font-family="DejaVu Sans, sans-serif" text-anchor="middle" fill="#ff9a77" fill-opacity="0.85" font-size="18" letter-spacing="8">PURE. FAST. REFINED.</text>
 </svg>
