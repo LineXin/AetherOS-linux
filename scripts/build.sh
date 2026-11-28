@@ -23,7 +23,7 @@ $SUDO lb clean --purge || true
 rm -rf config auto local
 cp -a "$ROOT/config" "$BUILD_DIR/config"
 
-export MKSQUASHFS_OPTIONS="-comp zstd -Xcompression-level 10 -b 1M -processors $(nproc)"
+export MKSQUASHFS_OPTIONS="-b 1M -processors $(nproc)"
 
 lb config \
   --mode debian \
