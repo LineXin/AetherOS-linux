@@ -20,12 +20,13 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-      - name: Install live-build tools
+      - name: Build and split XFCE Live ISO in Debian Trixie container
         run: |
-          sudo apt-get update
-          sudo apt-get install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin
-      - name: Build and split XFCE Live ISO
-        run: bash scripts/build.sh
+          docker run --rm --privileged \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            debian:trixie \
+            bash -c "apt-get update && apt-get install -y live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin && bash scripts/build.sh"
       - name: Verify release payload
         run: |
           test -s output/SHA256SUMS

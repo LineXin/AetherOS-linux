@@ -8,13 +8,18 @@ VERSION="13.8.0"
 OUTPUT_NAME="AetherOS-${VERSION}-amd64-XFCE.iso"
 OUTPUT_ISO="$OUT/$OUTPUT_NAME"
 
+SUDO=""
+if [ "$(id -u)" -ne 0 ]; then
+  SUDO="sudo"
+fi
+
 mkdir -p "$OUT" "$BUILD_DIR"
 rm -f "$OUT"/*.iso "$OUT"/*.part-* "$OUT/SHA256SUMS"
 
 bash "$ROOT/scripts/prepare-live-build.sh"
 
 cd "$BUILD_DIR"
-sudo lb clean --purge || true
+$SUDO lb clean --purge || true
 rm -rf config auto local
 cp -a "$ROOT/config" "$BUILD_DIR/config"
 
@@ -39,7 +44,7 @@ lb config \
   --win32-loader false \
   --firmware-binary false
 
-sudo lb build
+$SUDO lb build
 
 BUILT_ISO="$(find "$BUILD_DIR" -maxdepth 1 -name '*.iso' -print -quit)"
 if [ -z "$BUILT_ISO" ] || [ ! -s "$BUILT_ISO" ]; then
