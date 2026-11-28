@@ -666,7 +666,7 @@ fn build_ui(app: &Application) {
 fn main() {
     let app = Application::builder()
         .application_id(APP_ID)
-        .flags(ApplicationFlags::DEFAULT_FLAGS)
+        .flags(ApplicationFlags::default())
         .build();
     app.connect_activate(build_ui);
     app.run();
