@@ -27,6 +27,7 @@ jobs:
             -w /workspace \
             debian:trixie \
             bash -c "apt-get update && apt-get install -y live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin && bash scripts/build.sh"
+          sudo chown -R "$(id -u):$(id -g)" output
       - name: Verify release payload
         run: |
           test -s output/SHA256SUMS
