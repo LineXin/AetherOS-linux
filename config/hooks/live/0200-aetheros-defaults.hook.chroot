@@ -17,11 +17,11 @@ if command -v dconf >/dev/null 2>&1; then
 fi
 
 # Install Nerd Fonts SymbolsOnly for AetherHub & terminal icons
-if command -v curl >/dev/null 2>&1; then
+if command -v curl >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
     mkdir -p /usr/local/share/fonts/nerd-fonts
-    if curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.tar.xz" -o /tmp/nf.tar.xz; then
-        tar -xf /tmp/nf.tar.xz -C /usr/local/share/fonts/nerd-fonts
-        rm -f /tmp/nf.tar.xz
+    if curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.zip" -o /tmp/nf.zip; then
+        python3 -m zipfile -e /tmp/nf.zip /usr/local/share/fonts/nerd-fonts
+        rm -f /tmp/nf.zip
         command -v fc-cache >/dev/null 2>&1 && fc-cache -f || true
     fi
 fi
