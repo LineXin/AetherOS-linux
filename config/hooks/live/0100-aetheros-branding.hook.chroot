@@ -84,6 +84,20 @@ fi
 if [ -f /etc/calamares/modules/users.conf ]; then
     sed -i '/libpwquality:/,$d' /etc/calamares/modules/users.conf
 fi
+# Filter Calamares packages.conf remove list to only packages actually installed (avoids apt exit 100)
+if [ -d /etc/calamares/modules ]; then
+    {
+        echo "backend: apt"
+        echo ""
+        echo "operations:"
+        echo "  - remove:"
+        for pkg in live-boot live-boot-doc live-config live-config-doc live-config-systemd live-tools live-task-localisation live-task-recommended calamares-settings-debian; do
+            if dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "install ok installed"; then
+                echo "      - '$pkg'"
+            fi
+        done
+    } > /etc/calamares/modules/packages.conf
+fi
 command -v calamares >/dev/null 2>&1 || { echo "ERROR: calamares binary is missing!" >&2; exit 1; }
 for bin in /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper /usr/local/bin/aetheros-welcome; do
     [ -f "$bin" ] && chmod 0755 "$bin"
