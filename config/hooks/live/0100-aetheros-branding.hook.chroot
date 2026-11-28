@@ -38,27 +38,51 @@ if command -v gtk-update-icon-cache >/dev/null 2>&1; then
     gtk-update-icon-cache -f /usr/share/icons/hicolor || true
 fi
 
-# Render AetherOS SVG logo to PNG for Calamares branding and force aetheros branding
-if command -v python3 >/dev/null 2>&1 && [ -d /etc/calamares/branding/aetheros ]; then
+# Render AetherOS SVG logo to PNG for Calamares branding, icon theme, and replace Debian installer assets
+if command -v python3 >/dev/null 2>&1; then
     python3 - <<'PY' || true
+import os
 import gi
 gi.require_version("GdkPixbuf", "2.0")
 from gi.repository import GdkPixbuf
 src = "/usr/share/aetheros/branding/aetheros-logo.svg"
-for name, size in [("logo.png", 128), ("icon.png", 64), ("welcome.png", 256)]:
+if os.path.isdir("/etc/calamares/branding/aetheros"):
+    for name, size in [("logo.png", 128), ("icon.png", 64), ("welcome.png", 256)]:
+        pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, size, size, True)
+        pb.savev(f"/etc/calamares/branding/aetheros/{name}", "png", [], [])
+for size in [48, 64, 128, 256]:
+    d = f"/usr/share/icons/hicolor/{size}x{size}/apps"
+    os.makedirs(d, exist_ok=True)
     pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, size, size, True)
-    pb.savev(f"/etc/calamares/branding/aetheros/{name}", "png", [], [])
+    pb.savev(f"{d}/aetheros.png", "png", [], [])
+pb128 = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, 128, 128, True)
+pb128.savev("/usr/share/pixmaps/install-debian.png", "png", [], [])
 PY
 fi
-if [ -f /etc/calamares/settings.conf ]; then
-    sed -i 's/^branding:.*/branding: aetheros/' /etc/calamares/settings.conf
+
+rm -f /usr/share/applications/install-debian.desktop \
+      /usr/share/applications/calamares-install-debian.desktop \
+      /etc/xdg/autostart/calamares-desktop-icon.desktop \
+      /usr/share/glib-2.0/schemas/96_calamares-settings-debian.gschema.override
+
+if command -v glib-compile-schemas >/dev/null 2>&1 && [ -d /usr/share/glib-2.0/schemas ]; then
+    glib-compile-schemas /usr/share/glib-2.0/schemas || true
 fi
-rm -f /usr/share/applications/install-debian.desktop
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f /usr/share/icons/hicolor || true
+fi
+
 if [ -f /etc/calamares/settings.conf ]; then
     sed -i 's/^branding:.*/branding: aetheros/' /etc/calamares/settings.conf
+    if ! grep -q '^  - packagechooser$' /etc/calamares/settings.conf; then
+        sed -i 's/^  - summary$/  - packagechooser\n  - summary/' /etc/calamares/settings.conf
+    fi
 else
     echo "ERROR: /etc/calamares/settings.conf is missing!" >&2
     exit 1
+fi
+if [ -f /etc/calamares/modules/users.conf ]; then
+    sed -i '/libpwquality:/,$d' /etc/calamares/modules/users.conf
 fi
 command -v calamares >/dev/null 2>&1 || { echo "ERROR: calamares binary is missing!" >&2; exit 1; }
 chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper

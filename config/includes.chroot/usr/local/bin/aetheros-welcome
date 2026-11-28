@@ -124,7 +124,7 @@ class WelcomeApp(Gtk.Application):
         self.inst_btn = Gtk.Button()
         self.inst_btn.add_css_class("accent")
         self.inst_btn.set_valign(Gtk.Align.CENTER)
-        self.inst_btn.connect("clicked", lambda *_: subprocess.Popen(["pkexec", "calamares"]))
+        self.inst_btn.connect("clicked", lambda *_: subprocess.Popen(["calamares-install-debian"]))
         install_card.append(self.inst_btn)
         root.append(install_card)
 

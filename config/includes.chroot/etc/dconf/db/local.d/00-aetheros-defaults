@@ -12,3 +12,4 @@ picture-uri='file:///usr/share/backgrounds/aetheros-wallpaper-mountain.svg'
 
 [org/gnome/shell]
 enabled-extensions=['appindicatorsupport@rgcjonas.gmail.com', 'dash2dock-lite@icedman.github.com', 'blur-my-shell@aunetx']
+favorite-apps=['aetheros-welcome.desktop', 'calamares.desktop', 'aetherhub.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop']
