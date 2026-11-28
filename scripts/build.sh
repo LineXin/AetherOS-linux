@@ -25,7 +25,6 @@ lb config \
   --architectures amd64 \
   --archive-areas "main contrib non-free-firmware" \
   --binary-images iso-hybrid \
-  --bootloaders "grub-efi,syslinux" \
   --bootappend-live "boot=live components username=aetheros user-fullname=AetherOS hostname=aetheros quiet splash" \
   --iso-application "AetherOS" \
   --iso-publisher "AetherOS" \
