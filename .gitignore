@@ -3,3 +3,5 @@ output/
 *.log
 *.tmp
 __pycache__/
+aetherhub/target/
+build-lb/

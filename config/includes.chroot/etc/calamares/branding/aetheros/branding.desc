@@ -1,0 +1,38 @@
+---
+componentName: aetheros
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 800px,580px
+windowPlacement: center
+
+strings:
+    productName:         AetherOS
+    shortProductName:    AetherOS
+    version:             1.0
+    shortVersion:        1.0
+    versionedName:       AetherOS 1.0
+    shortVersionedName:  AetherOS 1.0
+    bootloaderEntryName: AetherOS
+    productUrl:          https://github.com/LineXin/AetherOS-linux
+    supportUrl:          https://github.com/LineXin/AetherOS-linux/issues
+    knownIssuesUrl:      https://github.com/LineXin/AetherOS-linux/issues
+    releaseNotesUrl:     https://github.com/LineXin/AetherOS-linux
+
+sidebar: widget
+navigation: widget
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+
+style:
+   SidebarBackground:        "#11151d"
+   SidebarText:              "#e8ebf2"
+   SidebarTextCurrent:       "#ffffff"
+   SidebarBackgroundCurrent: "#e96f4b"
+
+slideshowAPI: 2

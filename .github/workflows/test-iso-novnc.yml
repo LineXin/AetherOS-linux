@@ -1,0 +1,96 @@
+name: Test Release ISO via noVNC + Tailscale
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release tag to test (e.g. v0.1.0)"
+        required: true
+        type: string
+        default: "v0.1.0"
+      desktop_environment:
+        description: "Desktop environment ISO to test"
+        required: true
+        type: choice
+        default: "xfce"
+        options:
+          - xfce
+          - gnome
+      session_minutes:
+        description: "How many minutes to keep noVNC running"
+        required: true
+        type: string
+        default: "30"
+      disk_size_gb:
+        description: "Virtual disk size in GB for testing installation (0 = no disk)"
+        required: true
+        type: choice
+        default: "70"
+        options:
+          - "0"
+          - "40"
+          - "70"
+          - "80"
+permissions:
+  contents: read
+jobs:
+  test-novnc:
+    name: Boot Release ISO in QEMU + noVNC
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+
+      - name: Install QEMU and noVNC
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 novnc websockify
+
+      - name: Download and reconstruct ISO from Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p test-iso
+          gh release download "${{ inputs.release_tag }}" --dir test-iso --pattern "*.part-*" --pattern "SHA256SUMS"
+          cd test-iso
+          DE_UPPER=$(echo "${{ inputs.desktop_environment }}" | tr '[:lower:]' '[:upper:]')
+          ISO_NAME="AetherOS-13.8.0-amd64-${DE_UPPER}.iso"
+          cat ${ISO_NAME}.part-* > "$ISO_NAME"
+          grep "${ISO_NAME}$" SHA256SUMS | sha256sum --check -
+          rm -f *.part-*
+          mv "$ISO_NAME" test.iso
+
+      - name: Start QEMU + noVNC and wait
+        run: |
+          TS_IP=$(tailscale ip -4 | head -n1)
+          KVM_FLAG=""
+          if [ -e /dev/kvm ]; then
+            KVM_FLAG="-enable-kvm -cpu host"
+          fi
+          DISK_FLAG=""
+          if [ "${{ inputs.disk_size_gb }}" != "0" ]; then
+            qemu-img create -f qcow2 test-iso/disk.qcow2 "${{ inputs.disk_size_gb }}G"
+            DISK_FLAG="-drive file=test-iso/disk.qcow2,format=qcow2,if=virtio"
+          fi
+          sudo qemu-system-x86_64 \
+            $KVM_FLAG \
+            -smp 4 \
+            -m 4096 \
+            -vga virtio \
+            -vnc 127.0.0.1:0 \
+            $DISK_FLAG \
+            -cdrom test-iso/test.iso \
+            -boot d \
+            -daemonize
+          websockify --web=/usr/share/novnc 6080 127.0.0.1:5900 &
+          echo "=========================================="
+          echo "noVNC URL: http://${TS_IP}:6080/vnc.html"
+          echo "Direct VNC: ${TS_IP}:5900"
+          echo "Running for ${{ inputs.session_minutes }} minutes (or cancel job to stop)."
+          echo "=========================================="
+          sleep "$(( ${{ inputs.session_minutes }} * 60 ))"

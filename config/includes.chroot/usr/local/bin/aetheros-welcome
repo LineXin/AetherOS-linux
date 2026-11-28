@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import gi
+gi.require_version("Gtk", "4.0")
+from gi.repository import Gdk, Gtk
+
+DONE_FILE = Path.home() / ".config" / "aetheros-welcome.done"
+IS_LIVE = Path("/run/live/medium").exists()
+
+TEXTS = {
+    "en": {
+        "title": "Welcome to AetherOS",
+        "subtitle": "Fast, clean Debian-based Linux with custom defaults.",
+        "install_title": "Install AetherOS to Disk",
+        "install_desc": "Launch the Calamares installer and choose GNOME or XFCE.",
+        "install_btn": "Install System",
+        "hub_title": "AetherHub Settings",
+        "hub_desc": "Tune performance, services, network, and appearance.",
+        "hub_btn": "Open AetherHub",
+        "close_btn": "Close",
+        "live_badge": "Live Session",
+        "installed_badge": "Installed System",
+    },
+    "ru": {
+        "title": "Добро пожаловать в AetherOS",
+        "subtitle": "Быстрый и чистый Linux на базе Debian с готовой настройкой.",
+        "install_title": "Установить AetherOS на диск",
+        "install_desc": "Запустить установщик Calamares с выбором GNOME или XFCE.",
+        "install_btn": "Установить систему",
+        "hub_title": "Настройки AetherHub",
+        "hub_desc": "Управление производительностью, службами, сетью и темой.",
+        "hub_btn": "Открыть AetherHub",
+        "close_btn": "Закрыть",
+        "live_badge": "Live-сессия",
+        "installed_badge": "Установленная система",
+    },
+}
+
+
+class WelcomeApp(Gtk.Application):
+    def __init__(self):
+        super().__init__(application_id="org.aetheros.Welcome")
+        self.lang = "ru" if os.environ.get("LANG", "").startswith("ru") else "en"
+
+    def do_activate(self):
+        css = Gtk.CssProvider()
+        css.load_from_data(b"""
+            window, .welcome-root { background: #11151d; color: #e8ebf2; }
+            .card { background: #1c2330; border: 1px solid #2b3444; border-radius: 12px; padding: 16px; }
+            .title { font-size: 24px; font-weight: 700; color: #f3f4f7; }
+            .subtitle { font-size: 13px; color: #98a2b3; }
+            .card-title { font-size: 15px; font-weight: 600; color: #f3f4f7; }
+            .card-desc { font-size: 12px; color: #aab3c2; }
+            .badge { background: #2b3545; color: #f3f4f7; border-radius: 999px; padding: 4px 10px; font-size: 11px; }
+            button { background: #1c2330; color: #e8ebf2; border: 1px solid #2b3444; border-radius: 8px; padding: 8px 14px; }
+            button:hover { background: #252e3f; }
+            button.accent { background: #e96f4b; color: #ffffff; border-color: #e96f4b; font-weight: 600; }
+            button.accent:hover { background: #f17850; }
+        """)
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_USER
+        )
+
+        win = Gtk.ApplicationWindow(application=self, title="AetherOS Welcome")
+        win.set_default_size(620, 440)
+        win.set_resizable(False)
+
+        root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
+        root.add_css_class("welcome-root")
+        root.set_margin_top(24)
+        root.set_margin_bottom(24)
+        root.set_margin_start(28)
+        root.set_margin_end(28)
+
+        # Top bar: badge + language switch
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        self.badge_lbl = Gtk.Label()
+        self.badge_lbl.add_css_class("badge")
+        top.append(self.badge_lbl)
+
+        spacer = Gtk.Box()
+        spacer.set_hexpand(True)
+        top.append(spacer)
+
+        self.lang_btn = Gtk.Button(label="EN / RU")
+        self.lang_btn.connect("clicked", self.on_toggle_lang)
+        top.append(self.lang_btn)
+        root.append(top)
+
+        # Header
+        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=14)
+        logo = Gtk.Image.new_from_icon_name("aetheros")
+        logo.set_pixel_size(56)
+        header.append(logo)
+
+        h_text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self.title_lbl = Gtk.Label(xalign=0)
+        self.title_lbl.add_css_class("title")
+        self.sub_lbl = Gtk.Label(xalign=0)
+        self.sub_lbl.add_css_class("subtitle")
+        h_text.append(self.title_lbl)
+        h_text.append(self.sub_lbl)
+        header.append(h_text)
+        root.append(header)
+
+        # Install card
+        install_card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        install_card.add_css_class("card")
+        ic_text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        ic_text.set_hexpand(True)
+        self.inst_title = Gtk.Label(xalign=0)
+        self.inst_title.add_css_class("card-title")
+        self.inst_desc = Gtk.Label(xalign=0)
+        self.inst_desc.add_css_class("card-desc")
+        self.inst_desc.set_wrap(True)
+        ic_text.append(self.inst_title)
+        ic_text.append(self.inst_desc)
+        install_card.append(ic_text)
+
+        self.inst_btn = Gtk.Button()
+        self.inst_btn.add_css_class("accent")
+        self.inst_btn.set_valign(Gtk.Align.CENTER)
+        self.inst_btn.connect("clicked", lambda *_: subprocess.Popen(["calamares-install-debian"]))
+        install_card.append(self.inst_btn)
+        root.append(install_card)
+
+        # AetherHub card (if installed)
+        if Path("/usr/local/bin/aetherhub").exists():
+            hub_card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            hub_card.add_css_class("card")
+            hb_text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            hb_text.set_hexpand(True)
+            self.hub_title = Gtk.Label(xalign=0)
+            self.hub_title.add_css_class("card-title")
+            self.hub_desc = Gtk.Label(xalign=0)
+            self.hub_desc.add_css_class("card-desc")
+            self.hub_desc.set_wrap(True)
+            hb_text.append(self.hub_title)
+            hb_text.append(self.hub_desc)
+            hub_card.append(hb_text)
+
+            self.hub_btn = Gtk.Button()
+            self.hub_btn.set_valign(Gtk.Align.CENTER)
+            self.hub_btn.connect("clicked", lambda *_: subprocess.Popen(["/usr/local/bin/aetherhub"]))
+            hub_card.append(self.hub_btn)
+            root.append(hub_card)
+        else:
+            self.hub_title = None
+
+        # Footer
+        footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        f_spacer = Gtk.Box()
+        f_spacer.set_hexpand(True)
+        footer.append(f_spacer)
+        self.close_btn = Gtk.Button()
+        self.close_btn.connect("clicked", lambda *_: win.close())
+        footer.append(self.close_btn)
+        root.append(footer)
+
+        win.set_child(root)
+        self.apply_lang()
+        win.present()
+
+        if not IS_LIVE:
+            DONE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            DONE_FILE.touch()
+
+    def on_toggle_lang(self, _btn):
+        self.lang = "ru" if self.lang == "en" else "en"
+        self.apply_lang()
+
+    def apply_lang(self):
+        t = TEXTS[self.lang]
+        self.badge_lbl.set_text(t["live_badge"] if IS_LIVE else t["installed_badge"])
+        self.title_lbl.set_text(t["title"])
+        self.sub_lbl.set_text(t["subtitle"])
+        self.inst_title.set_text(t["install_title"])
+        self.inst_desc.set_text(t["install_desc"])
+        self.inst_btn.set_label(t["install_btn"])
+        if self.hub_title is not None:
+            self.hub_title.set_text(t["hub_title"])
+            self.hub_desc.set_text(t["hub_desc"])
+            self.hub_btn.set_label(t["hub_btn"])
+        self.close_btn.set_label(t["close_btn"])
+
+
+if __name__ == "__main__":
+    if "--autostart" in sys.argv and not IS_LIVE and DONE_FILE.exists():
+        sys.exit(0)
+    app = WelcomeApp()
+    sys.exit(app.run(None))

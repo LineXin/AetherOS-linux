@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AetherOS Welcome
+Comment=AetherOS welcome and installer launcher
+Exec=/usr/local/bin/aetheros-welcome --autostart
+Icon=aetheros
+Terminal=false
+Categories=System;
+X-GNOME-Autostart-enabled=true

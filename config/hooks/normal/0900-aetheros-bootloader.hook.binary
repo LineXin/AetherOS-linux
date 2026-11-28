@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+for dir in binary/boot/grub binary/isolinux binary/syslinux; do
+  if [ -d "$dir" ]; then
+    find "$dir" -type f \( -name '*.cfg' -o -name '*.txt' \) | while IFS= read -r cfg; do
+      sed -i 's/Debian GNU\/Linux/AetherOS/g; s/Debian Live/AetherOS Live/g; s/Debian/AetherOS/g' "$cfg"
+    done
+  fi
+done
+
+# Style isolinux/syslinux selection bar to match AetherOS and fit inside the panel.
+for stdmenu in binary/isolinux/stdmenu.cfg binary/syslinux/stdmenu.cfg; do
+  if [ -f "$stdmenu" ]; then
+    sed -i \
+      -e 's/^menu color sel .*/menu color sel\t*\t#ffffffff #e0f04d38 all/' \
+      -e 's/^menu color title .*/menu color title\t*\t#ffff9a77 #00000000 none/' \
+      -e 's/^menu width .*/menu width 62/' \
+      -e 's/^menu margin .*/menu margin 9/' \
+      -e 's/^menu hshift .*/menu hshift 0/' \
+      "$stdmenu"
+  fi
+done
+
+if [ -d binary/boot/grub ] && [ -f config/includes.binary/boot/grub/splash.png ]; then
+  cp -f config/includes.binary/boot/grub/splash.png binary/boot/grub/splash.png
+  if [ -f binary/boot/grub/grub.cfg ] && ! grep -q 'background_image /boot/grub/splash.png' binary/boot/grub/grub.cfg; then
+    sed -i '1i insmod png\nbackground_image /boot/grub/splash.png\nset color_normal=light-gray/black\nset color_highlight=white/brown' binary/boot/grub/grub.cfg
+  fi
+fi
+
+if [ -d binary/isolinux ] && [ -f config/includes.binary/isolinux/splash.png ]; then
+  cp -f config/includes.binary/isolinux/splash.png binary/isolinux/splash.png
+fi
+
+if [ -d binary/syslinux ] && [ -f config/includes.binary/syslinux/splash.png ]; then
+  cp -f config/includes.binary/syslinux/splash.png binary/syslinux/splash.png
+fi

@@ -5,7 +5,10 @@ case "$WALLPAPER" in
   /usr/share/aetheros/branding/aetheros-wallpaper-mountain.svg|/usr/share/aetheros/branding/aetheros-wallpaper-abstract.svg) ;;
   *) echo "Wallpaper path is not an approved AetherOS asset" >&2; exit 2;;
 esac
-if command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
+if command -v gsettings >/dev/null 2>&1 && [ "${XDG_CURRENT_DESKTOP:-}" = "GNOME" -o "${DESKTOP_SESSION:-}" = "gnome" ]; then
+    gsettings set org.gnome.desktop.background picture-uri "file://$WALLPAPER"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$WALLPAPER"
+elif command -v plasma-apply-wallpaperimage >/dev/null 2>&1; then
     plasma-apply-wallpaperimage "$WALLPAPER"
 elif command -v xfconf-query >/dev/null 2>&1; then
     xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -n -t string -s "$WALLPAPER" 2>/dev/null || xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path -s "$WALLPAPER"

@@ -7,6 +7,22 @@ on:
         required: true
         type: string
         default: "v0.1.0"
+      desktop_environment:
+        description: "Desktop environment to build"
+        required: true
+        type: choice
+        default: "xfce"
+        options:
+          - xfce
+          - gnome
+      build_mode:
+        description: "Build mode (fast_repack updates latest release; full_live_build builds from scratch)"
+        required: true
+        type: choice
+        default: "fast_repack"
+        options:
+          - fast_repack
+          - full_live_build
   push:
     tags:
       - "v*"
@@ -14,23 +30,36 @@ permissions:
   contents: write
 jobs:
   build-and-release:
-    name: Build XFCE + KDE and publish Release
+    name: Build ${{ inputs.desktop_environment || 'xfce' }} and publish Release
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 45
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
-      - name: Install ISO tools
+      - name: Build and split Live ISO in Debian Trixie container
+        env:
+          AETHEROS_DE: ${{ inputs.desktop_environment || 'xfce' }}
+          BUILD_MODE: ${{ inputs.build_mode || 'fast_repack' }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          sudo apt-get update
-          sudo apt-get install -y curl xorriso
-      - name: Build and split both Live ISO editions
-        run: bash scripts/build.sh
+          SCRIPT="scripts/repack-latest.sh"
+          if [ "$BUILD_MODE" = "full_live_build" ]; then
+            SCRIPT="scripts/build.sh"
+          fi
+          docker run --rm --privileged \
+            -e AETHEROS_DE="$AETHEROS_DE" \
+            -e GH_TOKEN="$GH_TOKEN" \
+            -e GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            debian:trixie \
+            bash -c "apt-get update && apt-get install -y curl python3 live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin rustc cargo libgtk-4-dev pkg-config && bash \"$SCRIPT\" \"\$AETHEROS_DE\""
+          sudo chown -R "$(id -u):$(id -g)" output
       - name: Verify release payload
         run: |
           test -s output/SHA256SUMS
-          test -n "$(find output -maxdepth 1 -name 'AetherOS-13.8.0-amd64-XFCE.iso.part-*' -print -quit)"
-          test -n "$(find output -maxdepth 1 -name 'AetherOS-13.8.0-amd64-KDE.iso.part-*' -print -quit)"
+          test -n "$(find output -maxdepth 1 -name 'AetherOS-13.8.0-amd64-*.iso.part-*' -print -quit)"
           while IFS= read -r part; do
             size=$(stat -c '%s' "$part")
             test "$size" -lt 2000000000

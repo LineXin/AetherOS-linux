@@ -1,0 +1,93 @@
+name: Publish Official AetherOS Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (e.g. v1.0.0)"
+        required: true
+        type: string
+        default: "v1.0.0"
+      release_title:
+        description: "Release title (e.g. AetherOS 1.0.0)"
+        required: true
+        type: string
+        default: "AetherOS 1.0.0"
+      editions:
+        description: "Editions to build and publish"
+        required: true
+        type: choice
+        default: "both"
+        options:
+          - both
+          - xfce
+          - gnome
+
+permissions:
+  contents: write
+
+jobs:
+  publish-release:
+    name: Build & Publish Official Release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build selected ISO editions in Debian Trixie container
+        env:
+          EDITIONS: ${{ inputs.editions }}
+        run: |
+          mkdir -p release-assets
+          if [ "$EDITIONS" = "both" ]; then
+            TARGETS="xfce gnome"
+          else
+            TARGETS="$EDITIONS"
+          fi
+          for de in $TARGETS; do
+            echo "=== Building $de edition ==="
+            docker run --rm --privileged \
+              -e AETHEROS_DE="$de" \
+              -v "${{ github.workspace }}:/workspace" \
+              -w /workspace \
+              debian:trixie \
+              bash -c "apt-get update && apt-get install -y curl python3 live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin rustc cargo libgtk-4-dev pkg-config && bash scripts/build.sh \"\$AETHEROS_DE\""
+            sudo chown -R "$(id -u):$(id -g)" output
+            cp -f output/*.part-* release-assets/
+            cat output/SHA256SUMS >> release-assets/SHA256SUMS
+          done
+
+      - name: Verify release payload
+        run: |
+          test -s release-assets/SHA256SUMS
+          test -n "$(find release-assets -maxdepth 1 -name 'AetherOS-13.8.0-amd64-*.iso.part-*' -print -quit)"
+          while IFS= read -r part; do
+            size=$(stat -c '%s' "$part")
+            test "$size" -lt 2000000000
+          done < <(find release-assets -maxdepth 1 -name '*.part-*' -type f)
+
+      - name: Prepare release notes
+        run: |
+          cp RELEASE_NOTES.md release-assets/RELEASE_NOTES.md
+          {
+            echo
+            echo "## SHA256 Checksums"
+            echo
+            echo '```'
+            cat release-assets/SHA256SUMS
+            echo '```'
+          } >> release-assets/RELEASE_NOTES.md
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: ${{ inputs.release_title }}
+          body_path: release-assets/RELEASE_NOTES.md
+          files: |
+            release-assets/*.part-*
+            release-assets/SHA256SUMS
+          draft: false
+          prerelease: false
+          make_latest: true
+          fail_on_unmatched_files: true

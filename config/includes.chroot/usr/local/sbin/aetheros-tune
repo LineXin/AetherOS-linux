@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-# Privileged allow-listed helper for AetherHub. Usage: aetheros-tune governor|swappiness|zram|service ...
+# Privileged allow-listed helper for AetherHub.
 case "${1:-}" in
   governor)
     [ "$#" -eq 2 ] || exit 2
@@ -28,9 +28,26 @@ case "${1:-}" in
     [ "$#" -eq 3 ] || exit 2
     unit="$2"
     action="$3"
-    case "$unit" in bluetooth|cups|thermald) ;; *) echo "Service not allowed" >&2; exit 2;; esac
-    case "$action" in start|stop|enable|disable|status) ;; *) exit 2;; esac
+    case "$unit" in bluetooth|cups|thermald|ssh|chrony|NetworkManager) ;; *) echo "Service not allowed" >&2; exit 2;; esac
+    case "$action" in start|stop|enable|disable|restart|status) ;; *) exit 2;; esac
     systemctl "$action" "$unit.service"
     ;;
-  *) echo "Usage: aetheros-tune governor VALUE | swappiness 0..100 | zram enable|disable|status | service bluetooth|cups|thermald start|stop|enable|disable|status" >&2; exit 2;;
+  drop-caches)
+    [ "$#" -eq 1 ] || exit 2
+    sync
+    sysctl -w vm.drop_caches=3
+    ;;
+  fstrim)
+    [ "$#" -eq 1 ] || exit 2
+    fstrim -av
+    ;;
+  apt-clean)
+    [ "$#" -eq 1 ] || exit 2
+    apt-get clean
+    echo "APT package cache cleaned."
+    ;;
+  *)
+    echo "Usage: aetheros-tune governor|swappiness|zram|service|drop-caches|fstrim|apt-clean ..." >&2
+    exit 2
+    ;;
 esac

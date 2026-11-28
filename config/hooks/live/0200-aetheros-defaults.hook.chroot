@@ -11,3 +11,41 @@ install -d -m 0755 /etc/skel/.config/fastfetch /etc/skel/.bashrc.d
 if ! grep -q '90-aetheros-fastfetch.sh' /etc/skel/.bashrc 2>/dev/null; then
     printf '\n[ -r "$HOME/.bashrc.d/90-aetheros-fastfetch.sh" ] && . "$HOME/.bashrc.d/90-aetheros-fastfetch.sh"\n' >> /etc/skel/.bashrc
 fi
+
+if command -v dconf >/dev/null 2>&1; then
+    dconf update || true
+fi
+
+# Install Nerd Fonts SymbolsOnly for AetherHub & terminal icons
+if command -v curl >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
+    mkdir -p /usr/local/share/fonts/nerd-fonts
+    if curl -fsSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.zip" -o /tmp/nf.zip; then
+        python3 -m zipfile -e /tmp/nf.zip /usr/local/share/fonts/nerd-fonts
+        rm -f /tmp/nf.zip
+        command -v fc-cache >/dev/null 2>&1 && fc-cache -f || true
+    fi
+fi
+
+# Install GNOME Shell extensions (615: appindicator, 4994: dash2dock-lite, 3193: blur-my-shell)
+if command -v gnome-shell >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1 && command -v curl >/dev/null 2>&1; then
+    GS_VER="$(gnome-shell --version | awk '{print $3}' | cut -d. -f1)"
+    for ext_id in 615 4994 3193; do
+        python3 - "$ext_id" "$GS_VER" <<'PY' || true
+import json, sys, urllib.request, zipfile, io, os
+ext_id, gs_ver = sys.argv[1], sys.argv[2]
+info_url = f"https://extensions.gnome.org/extension-info/?pk={ext_id}&shell_version={gs_ver}"
+data = json.loads(urllib.request.urlopen(info_url, timeout=20).read().decode())
+uuid = data["uuid"]
+dl_url = "https://extensions.gnome.org" + data["download_url"]
+raw = urllib.request.urlopen(dl_url, timeout=30).read()
+dest = f"/usr/share/gnome-shell/extensions/{uuid}"
+os.makedirs(dest, exist_ok=True)
+with zipfile.ZipFile(io.BytesIO(raw)) as zf:
+    zf.extractall(dest)
+schemas_dir = os.path.join(dest, "schemas")
+if os.path.isdir(schemas_dir):
+    os.system(f"glib-compile-schemas '{schemas_dir}'")
+print(f"Installed GNOME extension {uuid} ({ext_id})")
+PY
+    done
+fi

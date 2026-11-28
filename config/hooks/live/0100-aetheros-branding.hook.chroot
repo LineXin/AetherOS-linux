@@ -27,6 +27,82 @@ for asset in aetheros-wallpaper-mountain.svg aetheros-wallpaper-abstract.svg; do
     install -D -m 0644 "/usr/share/aetheros/branding/$asset" "/usr/share/backgrounds/$asset"
     install -D -m 0644 "/usr/share/aetheros/branding/$asset" "/usr/share/pixmaps/$asset"
 done
-chmod 0755 /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper
-chmod 0644 /etc/sudoers.d/aetherhub
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/pixmaps/aetheros.svg
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/icons/hicolor/scalable/apps/aetheros.svg
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /etc/skel/.face
+install -D -m 0644 /usr/share/aetheros/branding/aetheros-logo.svg /usr/share/pixmaps/faces/aetheros.svg
+if [ -d /usr/share/gnome-background-properties ]; then
+    find /usr/share/gnome-background-properties -maxdepth 1 -type f -name '*.xml' ! -name 'aetheros-wallpapers.xml' -delete
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f /usr/share/icons/hicolor || true
+fi
+
+# Render AetherOS SVG logo to PNG for Calamares branding, icon theme, and replace Debian installer assets
+if command -v python3 >/dev/null 2>&1; then
+    python3 - <<'PY' || true
+import os
+import gi
+gi.require_version("GdkPixbuf", "2.0")
+from gi.repository import GdkPixbuf
+src = "/usr/share/aetheros/branding/aetheros-logo.svg"
+if os.path.isdir("/etc/calamares/branding/aetheros"):
+    for name, size in [("logo.png", 128), ("icon.png", 64), ("welcome.png", 256)]:
+        pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, size, size, True)
+        pb.savev(f"/etc/calamares/branding/aetheros/{name}", "png", [], [])
+for size in [48, 64, 128, 256]:
+    d = f"/usr/share/icons/hicolor/{size}x{size}/apps"
+    os.makedirs(d, exist_ok=True)
+    pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, size, size, True)
+    pb.savev(f"{d}/aetheros.png", "png", [], [])
+pb128 = GdkPixbuf.Pixbuf.new_from_file_at_scale(src, 128, 128, True)
+pb128.savev("/usr/share/pixmaps/install-debian.png", "png", [], [])
+PY
+fi
+
+rm -f /usr/share/applications/install-debian.desktop \
+      /usr/share/applications/calamares-install-debian.desktop \
+      /etc/xdg/autostart/calamares-desktop-icon.desktop \
+      /usr/share/glib-2.0/schemas/96_calamares-settings-debian.gschema.override
+
+if command -v glib-compile-schemas >/dev/null 2>&1 && [ -d /usr/share/glib-2.0/schemas ]; then
+    glib-compile-schemas /usr/share/glib-2.0/schemas || true
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f /usr/share/icons/hicolor || true
+fi
+
+if [ -f /etc/calamares/settings.conf ]; then
+    sed -i 's/^branding:.*/branding: aetheros/' /etc/calamares/settings.conf
+    if ! grep -q '^  - packagechooser$' /etc/calamares/settings.conf; then
+        sed -i 's/^  - summary$/  - packagechooser\n  - summary/' /etc/calamares/settings.conf
+    fi
+else
+    echo "ERROR: /etc/calamares/settings.conf is missing!" >&2
+    exit 1
+fi
+if [ -f /etc/calamares/modules/users.conf ]; then
+    sed -i '/libpwquality:/,$d' /etc/calamares/modules/users.conf
+fi
+# Filter Calamares packages.conf remove list to only packages actually installed (avoids apt exit 100)
+if [ -d /etc/calamares/modules ]; then
+    {
+        echo "backend: apt"
+        echo ""
+        echo "operations:"
+        echo "  - remove:"
+        for pkg in live-boot live-boot-doc live-config live-config-doc live-config-systemd live-tools live-task-localisation live-task-recommended calamares-settings-debian; do
+            if dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "install ok installed"; then
+                echo "      - '$pkg'"
+            fi
+        done
+    } > /etc/calamares/modules/packages.conf
+fi
+command -v calamares >/dev/null 2>&1 || { echo "ERROR: calamares binary is missing!" >&2; exit 1; }
+for bin in /usr/local/sbin/aetheros-tune /usr/local/bin/aetherhub /usr/local/bin/aetheros-wallpaper /usr/local/bin/aetheros-welcome; do
+    [ -f "$bin" ] && chmod 0755 "$bin"
+done
+chown -R root:root /etc/sudoers.d /etc/calamares /etc/dconf /etc/gtk-3.0 /etc/gtk-4.0 /etc/gdm3 /etc/xdg /etc/aetheros /usr/local /usr/share/aetheros 2>/dev/null || true
+chmod 0755 /etc/sudoers.d
+chmod 0440 /etc/sudoers.d/* 2>/dev/null || true
 visudo -cf /etc/sudoers.d/aetherhub

@@ -6,3 +6,12 @@ git
 python3
 python3-gi
 gir1.2-gtk-4.0
+calamares
+calamares-settings-debian
+squashfs-tools
+dosfstools
+e2fsprogs
+grub-pc-bin
+grub-efi-amd64-bin
+cracklib-runtime
+wamerican

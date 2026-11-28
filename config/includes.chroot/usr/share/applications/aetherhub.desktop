@@ -2,7 +2,7 @@
 Name=AetherHub
 Comment=AetherOS control center
 Exec=aetherhub
-Icon=preferences-system
+Icon=aetherhub
 Terminal=false
 Type=Application
 Categories=Settings;System;

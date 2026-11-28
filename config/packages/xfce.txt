@@ -1,3 +1,8 @@
 xfce4
-xfce4-goodies
+xfce4-terminal
+thunar
+xfce4-settings
 lightdm
+lightdm-gtk-greeter
+elementary-xfce-icon-theme
+network-manager-gnome
