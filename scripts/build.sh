@@ -21,9 +21,13 @@ cp -a "$ROOT/config" "$BUILD_DIR/config"
 export MKSQUASHFS_OPTIONS="-comp zstd -Xcompression-level 10 -b 1M -processors $(nproc)"
 
 lb config \
+  --mode debian \
   --distribution trixie \
   --architectures amd64 \
   --archive-areas "main contrib non-free-firmware" \
+  --mirror-bootstrap "http://deb.debian.org/debian" \
+  --mirror-chroot "http://deb.debian.org/debian" \
+  --mirror-binary "http://deb.debian.org/debian" \
   --binary-images iso-hybrid \
   --bootappend-live "boot=live components username=aetheros user-fullname=AetherOS hostname=aetheros quiet splash" \
   --iso-application "AetherOS" \

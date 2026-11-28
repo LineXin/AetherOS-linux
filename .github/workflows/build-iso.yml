@@ -23,7 +23,7 @@ jobs:
       - name: Install live-build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y live-build debootstrap squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin
+          sudo apt-get install -y live-build debootstrap debian-archive-keyring squashfs-tools xorriso isolinux syslinux-common grub-pc-bin grub-efi-amd64-bin
       - name: Build and split XFCE Live ISO
         run: bash scripts/build.sh
       - name: Verify release payload
